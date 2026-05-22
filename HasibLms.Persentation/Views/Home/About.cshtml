@@ -1,0 +1,129 @@
+﻿@model HasibLms.Shared.DTOs.Settings.SiteSettingsDto
+@{
+    ViewBag.Title = "درباره ما";
+}
+
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-primary-700 to-primary-900 py-20">
+    <div class="container mx-auto px-4 text-center text-white">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4" data-aos="fade-up">درباره مالیبا</h1>
+        <p class="text-xl text-white/80 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+            @(Model?.Slogan ?? "پیشرو در آموزش تخصصی حسابداری و مالی")
+        </p>
+    </div>
+</section>
+
+<!-- About Content -->
+<section class="py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="prose prose-lg dark:prose-invert max-w-none" data-aos="fade-up">
+                @if (!string.IsNullOrEmpty(Model?.AboutText))
+                {
+                    @Html.Raw(Model.AboutText)
+                }
+                else
+                {
+                    <h2>معرفی موسسه مالیبا</h2>
+                    <p>
+                        موسسه آموزشی تخصصی حسابداری مالیبا با هدف ارائه آموزش‌های کاربردی و به‌روز در حوزه حسابداری،
+                        مالیات، سرمایه‌گذاری و مدیریت مالی تأسیس شده است. ما با بهره‌گیری از اساتید مجرب و متخصص
+                        و همچنین استفاده از متدهای نوین آموزشی، تلاش می‌کنیم تا دانشجویان را برای ورود به بازار کار آماده کنیم.
+                    </p>
+
+                    <h2>چشم انداز</h2>
+                    <p>
+                        تبدیل شدن به بزرگترین و معتبرترین مرکز آموزش تخصصی مالی در ایران و ارائه خدمات آموزشی با
+                        بالاترین استانداردهای بین‌المللی.
+                    </p>
+
+                    <h2>رسالت</h2>
+                    <p>
+                        توانمندسازی نیروی انسانی متخصص در حوزه مالی از طریق ارائه آموزش‌های کاربردی، به‌روز و مبتنی بر
+                        نیاز بازار کار، و همچنین ایجاد پلی بین دانشگاه و صنعت.
+                    </p>
+
+                    <h2>ارزش‌های ما</h2>
+                    <ul>
+                        <li>کیفیت و تعالی در آموزش</li>
+                        <li>تعهد و مسئولیت‌پذیری</li>
+                        <li>نوآوری و خلاقیت</li>
+                        <li>مشتری‌مداری و احترام به دانشجو</li>
+                        <li>شفافیت و صداقت</li>
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics -->
+<section class="py-16 bg-gradient-to-r from-primary-600 to-primary-800">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+            <div data-aos="fade-up">
+                <div class="text-4xl font-bold" x-data="{ count: 0 }" x-init="setTimeout(() => count = 10000, 200)">
+                    <span x-text="count.toLocaleString()"></span>+
+                </div>
+                <p class="mt-2 text-white/80">دانشجو</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="100">
+                <div class="text-4xl font-bold" x-data="{ count: 0 }" x-init="setTimeout(() => count = 150, 200)">
+                    <span x-text="count"></span>+
+                </div>
+                <p class="mt-2 text-white/80">دوره آموزشی</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="200">
+                <div class="text-4xl font-bold" x-data="{ count: 0 }" x-init="setTimeout(() => count = 50, 200)">
+                    <span x-text="count"></span>+
+                </div>
+                <p class="mt-2 text-white/80">مدرس حرفه‌ای</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="300">
+                <div class="text-4xl font-bold" x-data="{ count: 0 }" x-init="setTimeout(() => count = 98, 200)">
+                    <span x-text="count"></span>%
+                </div>
+                <p class="mt-2 text-white/80">رضایت دانشجویان</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="py-16">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12" data-aos="fade-up">
+            <h2 class="text-3xl font-bold text-gray-800 dark:text-white">تیم ما</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">اساتید و متخصصان حرفه‌ای مالیبا</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Team Member 1 -->
+            <div class="text-center" data-aos="fade-up">
+                <div class="w-40 h-40 mx-auto bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-user-graduate text-5xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mt-4">دکتر محمد حسینی</h3>
+                <p class="text-primary-600">مدیر آموزشی و مدرس ارشد</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">دکترای حسابداری مالی با ۱۵ سال سابقه تدریس</p>
+            </div>
+            <!-- Team Member 2 -->
+            <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                <div class="w-40 h-40 mx-auto bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-chalkboard-teacher text-5xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mt-4">مهندس سارا کریمی</h3>
+                <p class="text-primary-600">مدرس مالیات و حسابرسی</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">کارشناس ارشد حسابداری، حسابدار رسمی</p>
+            </div>
+            <!-- Team Member 3 -->
+            <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="w-40 h-40 mx-auto bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-chart-line text-5xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mt-4">دکتر علی محمدی</h3>
+                <p class="text-primary-600">مدرس سرمایه‌گذاری</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">دکترای مدیریت مالی، مشاور سرمایه‌گذاری</p>
+            </div>
+        </div>
+    </div>
+</section>

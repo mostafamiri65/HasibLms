@@ -1,0 +1,83 @@
+﻿@model HasibLms.Shared.DTOs.Instructor.CourseStatisticsDto
+@{
+    ViewBag.Title = "آمار دوره";
+    Layout = "_InstructorLayout";
+}
+
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <h1 class="text-xl font-bold text-gray-800 dark:text-white">آمار دوره</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">@Model.CourseTitle</p>
+        </div>
+
+        <div class="p-6">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
+                    <p class="text-2xl font-bold text-blue-600">@Model.TotalStudents</p>
+                    <p class="text-sm text-gray-600">تعداد دانشجویان</p>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center">
+                    <p class="text-2xl font-bold text-green-600">@Model.TotalRevenue.ToString("N0")</p>
+                    <p class="text-sm text-gray-600">درآمد کل (تومان)</p>
+                </div>
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4 text-center">
+                    <p class="text-2xl font-bold text-yellow-600">@Model.AverageRating.ToString("0.0")</p>
+                    <p class="text-sm text-gray-600">میانگین امتیاز</p>
+                </div>
+                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 text-center">
+                    <p class="text-2xl font-bold text-purple-600">@Model.RemainingCapacity</p>
+                    <p class="text-sm text-gray-600">ظرفیت باقیمانده</p>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm mb-1">
+                    <span>درصد تکمیل ظرفیت</span>
+                    <span>@Math.Round((double)(Model.TotalStudents * 100) / Model.Capacity, 1)%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-primary-600 h-2.5 rounded-full" style="width: @Math.Round((double)(Model.TotalStudents * 100) / Model.Capacity, 1)%"></div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div>
+                <h3 class="font-bold mb-3">آمار ثبت‌نام ماهانه</h3>
+                <canvas id="enrollmentChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const months = @Html.Raw(Json.Serialize(Model.MonthlyEnrollments.Select(m => m.Month).ToList()));
+        const counts = @Html.Raw(Json.Serialize(Model.MonthlyEnrollments.Select(m => m.Count).ToList()));
+
+        new Chart(document.getElementById('enrollmentChart'), {
+        type: 'line',
+        data: {
+        labels: months,
+        datasets: [{
+        label: 'تعداد ثبت‌نام',
+        data: counts,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+        legend: { position: 'top' }
+        }
+        }
+        });
+    </script>
+}

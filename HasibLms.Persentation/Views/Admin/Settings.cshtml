@@ -1,0 +1,150 @@
+﻿@model HasibLms.Shared.DTOs.Settings.SiteSettingsDto
+@{
+    ViewBag.Title = "تنظیمات سایت";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">تنظیمات سایت</h1>
+        <p class="text-gray-500 dark:text-gray-400">مدیریت تنظیمات عمومی سایت</p>
+    </div>
+
+    <form method="post" action="/admin/settings" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        
+        <div class="space-y-6">
+            <!-- Basic Info -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">اطلاعات پایه</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">نام موسسه</label>
+                        <input type="text" name="InstituteName" value="@Model?.InstituteName" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">نام اختصاری</label>
+                        <input type="text" name="InstituteShortName" value="@Model?.InstituteShortName" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">شعار</label>
+                        <input type="text" name="Slogan" value="@Model?.Slogan" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">اطلاعات تماس</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ایمیل</label>
+                        <input type="email" name="Email" value="@Model?.Email" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">تلفن</label>
+                        <input type="text" name="Phone" value="@Model?.Phone" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">موبایل</label>
+                        <input type="text" name="Mobile" value="@Model?.Mobile" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">آدرس</label>
+                        <textarea name="Address" rows="2" class="w-full px-4 py-2 border rounded-lg">@Model?.Address</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">شبکه‌های اجتماعی</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">اینستاگرام</label>
+                        <input type="url" name="Instagram" value="@Model?.Instagram" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">تلگرام</label>
+                        <input type="url" name="Telegram" value="@Model?.Telegram" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">لینکدین</label>
+                        <input type="url" name="LinkedIn" value="@Model?.LinkedIn" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">یوتیوب</label>
+                        <input type="url" name="YouTube" value="@Model?.YouTube" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appearance -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">ظاهر سایت</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">رنگ اصلی</label>
+                        <input type="color" name="PrimaryColor" value="@Model?.PrimaryColor" class="w-full h-10 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">رنگ ثانویه</label>
+                        <input type="color" name="SecondaryColor" value="@Model?.SecondaryColor" class="w-full h-10 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">واحد پول</label>
+                        <input type="text" name="CurrencySymbol" value="@Model?.CurrencySymbol" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ثبت نام</label>
+                        <select name="AllowRegistration" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="true" selected="@(Model?.AllowRegistration == true)">فعال</option>
+                            <option value="false" selected="@(Model?.AllowRegistration == false)">غیرفعال</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Text -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">متن درباره ما</h2>
+                <textarea name="AboutText" rows="10" class="w-full px-4 py-2 border rounded-lg">@Model?.AboutText</textarea>
+            </div>
+
+            <!-- Footer Text -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">متن فوتر</h2>
+                <textarea name="FooterText" rows="3" class="w-full px-4 py-2 border rounded-lg">@Model?.FooterText</textarea>
+                <div class="mt-2">
+                    <label class="block text-sm font-medium mb-1">متن کپی‌رایت</label>
+                    <input type="text" name="CopyrightText" value="@Model?.CopyrightText" class="w-full px-4 py-2 border rounded-lg">
+                </div>
+            </div>
+
+            <!-- SEO -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">تنظیمات SEO</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">عنوان Meta</label>
+                        <input type="text" name="MetaTitle" value="@Model?.MetaTitle" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">توضیحات Meta</label>
+                        <textarea name="MetaDescription" rows="2" class="w-full px-4 py-2 border rounded-lg">@Model?.MetaDescription</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">کلمات کلیدی Meta</label>
+                        <input type="text" name="MetaKeywords" value="@Model?.MetaKeywords" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                    <i class="fas fa-save ml-2"></i>ذخیره تنظیمات
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

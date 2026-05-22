@@ -1,0 +1,203 @@
+﻿@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.Admin.UserListDto>
+@{
+    ViewBag.Title = "مدیریت کاربران";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">مدیریت کاربران</h1>
+            <p class="text-gray-500 dark:text-gray-400">مدیریت و ویرایش کاربران سیستم</p>
+        </div>
+        <div class="flex gap-2">
+            <select id="roleFilter" onchange="filterByRole(this.value)" class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <option value="">همه نقش‌ها</option>
+                <option value="Admin">مدیران</option>
+                <option value="Instructor">مدرسان</option>
+                <option value="Student">دانشجویان</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="جستجو..." class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">کاربر</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ایمیل</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">نقش‌ها</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">تاریخ عضویت</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">وضعیت</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach (var user in Model.Items)
+                    {
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-medium">@(user.FullName?.Substring(0, 1) ?? "U")</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800 dark:text-white">@user.FullName</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">@user.Email</td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach (var role in user.Roles)
+                                    {
+                                        <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 text-xs rounded-full">@role</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500">@user.CreatedDate.ToString("yyyy/MM/dd")</td>
+                            <td class="px-6 py-4">
+                                @if (user.IsLockedOut)
+                                {
+                                    <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">غیرفعال</span>
+                                }
+                                else
+                                {
+                                    <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">فعال</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex gap-2">
+                                    <button onclick="showRoleModal('@user.Id', '@user.FullName')" class="p-1 text-blue-600 hover:text-blue-700">
+                                        <i class="fas fa-user-tag"></i>
+                                    </button>
+                                    <button onclick="toggleUserStatus('@user.Id')" class="p-1 text-@(user.IsLockedOut ? "green" : "red")-600">
+                                        <i class="fas fa-@(user.IsLockedOut ? "check" : "ban")"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex justify-center gap-2">
+                    <a href="?page=@(Model.PageNumber - 1)" class="px-3 py-2 rounded-lg border @(Model.HasPreviousPage ? "hover:bg-gray-50" : "opacity-50 pointer-events-none")">قبلی</a>
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a href="?page=@i" class="px-3 py-2 rounded-lg border @(i == Model.PageNumber ? "bg-primary-600 text-white" : "hover:bg-gray-50")">@i</a>
+                    }
+                    <a href="?page=@(Model.PageNumber + 1)" class="px-3 py-2 rounded-lg border @(Model.HasNextPage ? "hover:bg-gray-50" : "opacity-50 pointer-events-none")">بعدی</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Role Modal -->
+<div id="roleModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="if(event.target === this) closeModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6">
+        <h3 class="text-xl font-bold mb-4">مدیریت نقش‌ها</h3>
+        <p class="text-gray-500 mb-4">کاربر: <span id="userName"></span></p>
+        <input type="hidden" id="userId">
+        <div class="space-y-2 mb-6">
+            <div class="flex items-center justify-between p-2 border rounded-lg">
+                <span>مدیر</span>
+                <button onclick="toggleRole('Admin')" id="roleAdminBtn" class="px-3 py-1 rounded-lg text-sm">افزودن</button>
+            </div>
+            <div class="flex items-center justify-between p-2 border rounded-lg">
+                <span>مدرس</span>
+                <button onclick="toggleRole('Instructor')" id="roleInstructorBtn" class="px-3 py-1 rounded-lg text-sm">افزودن</button>
+            </div>
+            <div class="flex items-center justify-between p-2 border rounded-lg">
+                <span>دانشجو</span>
+                <button onclick="toggleRole('Student')" id="roleStudentBtn" class="px-3 py-1 rounded-lg text-sm">افزودن</button>
+            </div>
+        </div>
+        <div class="flex justify-end gap-3">
+            <button onclick="closeModal()" class="px-4 py-2 border rounded-lg">بستن</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUserRoles = [];
+
+    async function showRoleModal(userId, userName) {
+        document.getElementById('userId').value = userId;
+        document.getElementById('userName').textContent = userName;
+        await loadUserRoles(userId);
+        document.getElementById('roleModal').classList.remove('hidden');
+        document.getElementById('roleModal').classList.add('flex');
+    }
+
+    async function loadUserRoles(userId) {
+        const response = await fetch(`/api/admin/user-roles?userId=${userId}`);
+        currentUserRoles = await response.json();
+        updateRoleButtons();
+    }
+
+    function updateRoleButtons() {
+        const roles = ['Admin', 'Instructor', 'Student'];
+        roles.forEach(role => {
+            const btn = document.getElementById(`role${role}Btn`);
+            if (currentUserRoles.includes(role)) {
+                btn.textContent = 'حذف';
+                btn.classList.remove('bg-primary-600', 'text-white');
+                btn.classList.add('bg-red-500', 'text-white');
+            } else {
+                btn.textContent = 'افزودن';
+                btn.classList.remove('bg-red-500', 'text-white');
+                btn.classList.add('bg-primary-600', 'text-white');
+            }
+        });
+    }
+
+    async function toggleRole(role) {
+        const userId = document.getElementById('userId').value;
+        const isAdding = !currentUserRoles.includes(role);
+
+        const response = await fetch('/admin/toggle-role', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, role, add: isAdding })
+        });
+
+        if (response.ok) {
+            await loadUserRoles(userId);
+            showToast(`نقش ${role} ${isAdding ? 'اضافه شد' : 'حذف شد'}`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('خطا در تغییر نقش', 'error');
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('roleModal').classList.add('hidden');
+        document.getElementById('roleModal').classList.remove('flex');
+    }
+
+    function filterByRole(role) {
+        window.location.href = `/admin/users?role=${role}`;
+    }
+
+    async function toggleUserStatus(userId) {
+        const response = await fetch('/admin/toggle-user-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
+
+        if (response.ok) {
+            showToast('وضعیت کاربر تغییر کرد', 'success');
+            setTimeout(() => location.reload(), 500);
+        }
+    }
+</script>

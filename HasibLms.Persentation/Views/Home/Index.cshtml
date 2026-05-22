@@ -1,0 +1,345 @@
+﻿@model HasibLms.Shared.DTOs.HomePageDto
+@using HasibLms.Domain.Interfaces
+@inject ISiteService SiteService
+@{
+    var settings = await SiteService.GetSettingsAsync();
+    ViewBag.Title = settings?.InstituteName ?? "صفحه اصلی";
+}
+
+<!-- Hero Section با افکت پارالاکس -->
+<section class="relative min-h-[90vh] flex items-center overflow-hidden">
+    <!-- Background Gradient -->
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-700 via-primary-600 to-primary-800"></div>
+
+    <!-- Animated Background Shapes -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-400/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="container mx-auto px-4 relative z-10 py-20">
+        <div class="max-w-4xl mx-auto text-center" data-aos="fade-up">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span class="text-white/90 text-sm">بیش از ۱۰,۰۰۰ دانشجو به ما اعتماد کرده‌اند</span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                @(settings?.Slogan ?? "بهترین آموزش‌های تخصصی")
+                <span class="block text-3xl md:text-5xl lg:text-6xl font-light mt-2 text-white/90">
+                    حسابداری و مالی
+                </span>
+            </h1>
+
+            <!-- Description -->
+            <p class="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
+                با اساتید مجرب و محتوای به‌روز، مهارت‌های مالی خود را به سطح بعدی ببرید.
+                دوره‌های تخصصی در حوزه حسابداری، مالیات، سرمایه‌گذاری و بودجه‌ریزی
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/course"
+                       class="group px-8 py-4 bg-white text-primary-700 rounded-xl font-semibold hover:shadow-2xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                    <span>شروع یادگیری</span>
+                    <i class="fas fa-arrow-left group-hover:translate-x-1 transition-transform"></i>
+                </a>
+                <a href="/about"
+                       class="group px-8 py-4 border-2 border-white/30 text-white rounded-xl font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                    <span>بیشتر بدانید</span>
+                    <i class="fas fa-play group-hover:scale-110 transition-transform"></i>
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-8 border-t border-white/20">
+                <div data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-3xl md:text-4xl font-bold text-white">۱۵۰+</div>
+                    <div class="text-white/70 text-sm mt-1">دوره تخصصی</div>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-3xl md:text-4xl font-bold text-white">۱۰,۰۰۰+</div>
+                    <div class="text-white/70 text-sm mt-1">دانشجو فعال</div>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-3xl md:text-4xl font-bold text-white">۵۰+</div>
+                    <div class="text-white/70 text-sm mt-1">مدرس حرفه‌ای</div>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="400">
+                    <div class="text-3xl md:text-4xl font-bold text-white">۹۸%</div>
+                    <div class="text-white/70 text-sm mt-1">رضایت دانشجویان</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wave Divider -->
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg class="w-full h-16 text-gray-50 dark:text-gray-900" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="fill-current"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-20 bg-gray-50 dark:bg-gray-900/50">
+    <div class="container mx-auto px-4">
+        <div class="text-center max-w-3xl mx-auto mb-12" data-aos="fade-up">
+            <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">چرا مالیبا؟</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
+                چرا باید ما را انتخاب کنید؟
+            </h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-4">
+                ما با ارائه بهترین خدمات و محتوای آموزشی با کیفیت، تجربه یادگیری متفاوتی را برای شما فراهم می‌کنیم
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="100">
+                <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
+                    <i class="fas fa-chalkboard-teacher text-3xl text-primary-600 group-hover:text-white transition-colors"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">اساتید مجرب</h3>
+                <p class="text-gray-500 dark:text-gray-400">بهره‌مندی از بهترین اساتید با سال‌ها تجربه تدریس</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="200">
+                <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
+                    <i class="fas fa-video text-3xl text-primary-600 group-hover:text-white transition-colors"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">محتوای آفلاین و آنلاین</h3>
+                <p class="text-gray-500 dark:text-gray-400">دسترسی به محتوا در هر زمان و مکانی</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="300">
+                <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
+                    <i class="fas fa-certificate text-3xl text-primary-600 group-hover:text-white transition-colors"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">گواهینامه معتبر</h3>
+                <p class="text-gray-500 dark:text-gray-400">دریافت گواهینامه پایان دوره با اعتبار بین‌المللی</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="400">
+                <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
+                    <i class="fas fa-headset text-3xl text-primary-600 group-hover:text-white transition-colors"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">پشتیبانی ۲۴/۷</h3>
+                <p class="text-gray-500 dark:text-gray-400">تیم پشتیبانی آماده پاسخگویی به سوالات شما</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Courses -->
+<section class="py-20">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-end mb-12 flex-wrap gap-4" data-aos="fade-up">
+            <div>
+                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">دوره‌های منتخب</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
+                    محبوب‌ترین دوره‌های مالیبا
+                </h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-2 max-w-2xl">
+                    دوره‌هایی که بیشترین استقبال را داشته‌اند و با بالاترین امتیاز از طرف دانشجویان
+                </p>
+            </div>
+            <a href="/course" class="text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group">
+                مشاهده همه دوره‌ها
+                <i class="fas fa-arrow-left group-hover:translate-x-1 transition-transform"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            @foreach (var course in Model.FeaturedCourses)
+            {
+                <partial name="_CourseCard" model="course" />
+            }
+        </div>
+
+        @if (!Model.FeaturedCourses.Any())
+        {
+            <div class="text-center py-12">
+                <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500">هیچ دوره‌ای یافت نشد</p>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Categories Section with Icons -->
+<section class="py-20 bg-gray-50 dark:bg-gray-900/50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12" data-aos="fade-up">
+            <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">دسته‌بندی</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
+                موضوعات آموزشی
+            </h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-3 max-w-2xl mx-auto">
+                در تخصصی‌ترین زمینه‌های مالی و حسابداری با ما همراه شوید
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            @foreach (var category in Model.Categories)
+            {
+                <a href="/category/@category.Slug"
+                       class="group bg-white dark:bg-gray-800 rounded-2xl p-6 text-center hover:shadow-2xl transition-all transform hover:-translate-y-2"
+                       data-aos="fade-up" data-aos-delay="@(LoopIndex * 100)">
+                    <div class="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas @GetCategoryIcon(category.Slug) text-3xl text-primary-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">@category.Name</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">@category.Children.Count دوره</p>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+@functions {
+    private int LoopIndex = 0;
+    private string GetCategoryIcon(string slug)
+    {
+        return slug switch
+        {
+            "accounting" => "fa-calculator",
+            "tax" => "fa-file-invoice-dollar",
+            "investment" => "fa-chart-line",
+            "budgeting" => "fa-chart-pie",
+            "audit" => "fa-clipboard-list",
+            _ => "fa-graduation-cap"
+        };
+    }
+}
+
+<!-- Latest Courses with Slider -->
+<section class="py-20">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-end mb-12 flex-wrap gap-4" data-aos="fade-up">
+            <div>
+                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">جدیدترین‌ها</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
+                    آخرین دوره‌های اضافه شده
+                </h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">به‌روزترین دوره‌های آموزشی مالیبا</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var course in Model.LatestCourses)
+            {
+                <partial name="_CourseCard" model="course" />
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-20 bg-primary-700">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12" data-aos="fade-up">
+            <span class="text-white/80 text-sm uppercase tracking-wider">نظرات دانشجویان</span>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mt-2">
+                چه می‌گویند؟
+            </h2>
+            <p class="text-white/70 mt-3 max-w-2xl mx-auto">
+                تجربه یادگیری دانشجویان ما در موسسه مالیبا
+            </p>
+        </div>
+
+        <div class="swiper testimonial-slider overflow-hidden" x-data="initTestimonialSlider()" x-init="initSlider()">
+            <div class="swiper-wrapper">
+                <!-- Sample Testimonial 1 -->
+                <div class="swiper-slide">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                                <span class="text-white font-bold text-xl">م</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 dark:text-white">محمد رضایی</h4>
+                                <div class="flex text-yellow-400 text-sm mt-1">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                            "دوره حسابداری مالی بسیار عالی بود. اساتید حرفه‌ای و پشتیبانی فوق‌العاده. واقعاً راضی هستم."
+                        </p>
+                    </div>
+                </div>
+                <!-- Add more testimonials... -->
+            </div>
+            <div class="flex justify-center gap-2 mt-8">
+                <div class="swiper-button-prev !relative !left-auto !right-auto !mt-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
+                    <i class="fas fa-chevron-right text-white"></i>
+                </div>
+                <div class="swiper-button-next !relative !left-auto !right-auto !mt-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
+                    <i class="fas fa-chevron-left text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="py-20">
+    <div class="container mx-auto px-4">
+        <div class="bg-gradient-to-r from-primary-600 to-primary-800 rounded-3xl overflow-hidden shadow-2xl">
+            <div class="flex flex-col md:flex-row items-center justify-between p-8 md:p-12">
+                <div class="text-center md:text-right mb-6 md:mb-0" data-aos="fade-right">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">
+                        آماده شروع یادگیری هستید؟
+                    </h3>
+                    <p class="text-white/80">
+                        همین حالا ثبت نام کنید و از تخفیف‌های ویژه بهره‌مند شوید
+                    </p>
+                </div>
+                <div data-aos="fade-left">
+                    <a href="/auth/register" class="inline-flex items-center gap-2 px-8 py-4 bg-white text-primary-700 rounded-xl font-semibold hover:shadow-xl transition-all transform hover:-translate-y-1">
+                        <span>شروع یادگیری</span>
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function initTestimonialSlider() {
+        return {
+            initSlider() {
+                new Swiper('.testimonial-slider', {
+                    slidesPerView: 1,
+                    spaceBetween: 30,
+                    loop: true,
+                    autoplay: {
+                        delay: 5000,
+                        disableOnInteraction: false,
+                    },
+                    breakpoints: {
+                        640: { slidesPerView: 1 },
+                        768: { slidesPerView: 2 },
+                        1024: { slidesPerView: 3 },
+                    },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                });
+            }
+        }
+    }
+</script>

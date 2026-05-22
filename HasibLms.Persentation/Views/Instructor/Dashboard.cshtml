@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "داشبورد مدرس";
+    Layout = "_InstructorLayout";
+}
+
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">داشبورد مدرس</h1>
+        <p class="text-gray-500 dark:text-gray-400">به پنل مدیریت دوره‌های خود خوش آمدید</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">دوره‌های من</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">@ViewBag.TotalCourses</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-graduation-cap text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <a href="/instructor/courses" class="text-sm text-primary-600 mt-2 inline-block">مشاهده همه</a>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">کل دانشجویان</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">@ViewBag.TotalStudents</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-users text-green-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Courses -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-white">دوره‌های اخیر من</h2>
+            <a href="/instructor/courses" class="text-primary-600 text-sm hover:underline">مشاهده همه</a>
+        </div>
+        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            @foreach (var course in ViewBag.RecentCourses as List<CourseCardDto> ?? new List<CourseCardDto>())
+            {
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                            @if (!string.IsNullOrEmpty(course.ImageUrl))
+                            {
+                                <img src="@course.ImageUrl" alt="@course.Title" class="w-full h-full object-cover">
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="fas fa-graduation-cap text-gray-400"></i>
+                                </div>
+                            }
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800 dark:text-white">@course.Title</p>
+                            <p class="text-sm text-gray-500">@course.EnrolledCount دانشجو</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="/instructor/edit-course/@course.Id" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="/instructor/syllabus?courseId=@course.Id" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                            <i class="fas fa-list"></i>
+                        </a>
+                        <a href="/instructor/statistics?courseId=@course.Id" class="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                            <i class="fas fa-chart-line"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+            @if (!((List<CourseCardDto>)ViewBag.RecentCourses).Any())
+            {
+                <div class="px-6 py-8 text-center">
+                    <i class="fas fa-graduation-cap text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">هیچ دوره‌ای وجود ندارد</p>
+                    <a href="/instructor/create-course" class="inline-block mt-3 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm">ایجاد اولین دوره</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

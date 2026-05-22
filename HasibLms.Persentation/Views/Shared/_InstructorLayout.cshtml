@@ -1,0 +1,98 @@
+﻿@using HasibLms.Domain.Interfaces
+@using Microsoft.AspNetCore.Identity
+@inject ISiteService SiteService
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@{
+    var settings = await SiteService.GetSettingsAsync();
+    var user = await UserManager.GetUserAsync(User);
+}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - پنل مدرس</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        * { font-family: 'Vazirmatn', sans-serif; }
+        [x-cloak] { display: none !important; }
+        .sidebar-item.active { background-color: #3b82f6; color: white; }
+        .sidebar-item.active i { color: white; }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="flex h-screen" x-data="{ sidebarOpen: true }">
+        <!-- Sidebar -->
+        <aside class="bg-white dark:bg-gray-800 shadow-xl w-64 transition-all duration-300" :class="sidebarOpen ? 'w-64' : 'w-20'">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div x-show="sidebarOpen">
+                    <span class="text-xl font-bold text-primary-600">@(settings?.InstituteShortName ?? "مالیبا")</span>
+                    <span class="text-xs text-gray-500 block">پنل مدرس</span>
+                </div>
+                <button @@click="sidebarOpen = !sidebarOpen" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="p-4 space-y-2">
+                <a href="/instructor/dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span x-show="sidebarOpen">داشبورد</span>
+                </a>
+                <a href="/instructor/courses" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-graduation-cap w-5"></i>
+                    <span x-show="sidebarOpen">دوره‌های من</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-gray-800 dark:text-white">@ViewBag.Title</h1>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium">@(user?.FullName?.Substring(0,1) ?? "م")</span>
+                        </div>
+                        <div class="hidden md:block">
+                            <p class="text-sm font-medium text-gray-800 dark:text-white">@user?.FullName</p>
+                            <p class="text-xs text-gray-500">مدرس</p>
+                        </div>
+                    </div>
+                    <a href="/" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <form action="/auth/logout" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </form>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

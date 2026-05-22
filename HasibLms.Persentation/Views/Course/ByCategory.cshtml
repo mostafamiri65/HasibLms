@@ -1,0 +1,87 @@
+﻿@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.CourseCardDto>
+@{
+    ViewBag.Title = $"دوره‌های {ViewBag.CategoryName}";
+}
+
+<!-- Category Header -->
+<section class="relative bg-gradient-to-br from-primary-700 to-primary-900 py-16">
+    <div class="container mx-auto px-4 text-center text-white">
+        <h1 class="text-3xl md:text-5xl font-bold mb-4" data-aos="fade-up">دسته‌بندی @ViewBag.CategoryName</h1>
+        <p class="text-white/80 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+            @(ViewBag.Category?.Description ?? $"دوره‌های تخصصی {ViewBag.CategoryName} در موسسه مالیبا")
+        </p>
+    </div>
+</section>
+
+<div class="container mx-auto px-4 py-12">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar -->
+        <div class="lg:w-1/4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 sticky top-24">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">دسته‌بندی‌ها</h3>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="/course" class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors @(ViewBag.CurrentCategory == null ? "text-primary-600 bg-primary-50 dark:bg-primary-900/20" : "text-gray-600")">
+                            <span>همه دوره‌ها</span>
+                            <span class="text-xs text-gray-400">@ViewBag.TotalCourses</span>
+                        </a>
+                    </li>
+                    @foreach (var cat in ViewBag.Categories as List<CategoryDto> ?? new List<CategoryDto>())
+                    {
+                        <li>
+                            <a href="/category/@cat.Slug" class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors @(ViewBag.CategoryName == cat.Name ? "text-primary-600 bg-primary-50 dark:bg-primary-900/20" : "text-gray-600")">
+                                <span>@cat.Name</span>
+                                @* <span class="text-xs text-gray-400">@cat.CoursesCount</span> *@
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Course Grid -->
+        <div class="lg:w-3/4">
+            @if (Model.Items.Any())
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach (var course in Model.Items)
+                    {
+                        <partial name="_CourseCard" model="course" />
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="flex justify-center mt-8">
+                        <nav class="flex items-center gap-2">
+                            <a href="?page=@(Model.PageNumber - 1)"
+                                   class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors @(Model.HasPreviousPage ? "" : "opacity-50 pointer-events-none")">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <a href="?page=@i"
+                                       class="min-w-[40px] h-10 flex items-center justify-center rounded-lg border @(i == Model.PageNumber ? "bg-primary-600 text-white border-primary-600" : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800") transition-colors">
+                                    @i
+                                </a>
+                            }
+                            <a href="?page=@(Model.PageNumber + 1)"
+                                   class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors @(Model.HasNextPage ? "" : "opacity-50 pointer-events-none")">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl">
+                    <i class="fas fa-folder-open text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300">هیچ دوره‌ای در این دسته‌بندی وجود ندارد</h3>
+                    <a href="/course" class="inline-block mt-4 px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700">مشاهده همه دوره‌ها</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,152 @@
+﻿@model HasibLms.Shared.DTOs.Instructor.CreateCourseDto
+@using HasibLms.Shared.Enumerations
+@{
+    ViewBag.Title = "ایجاد دوره جدید";
+    Layout = "_InstructorLayout";
+}
+
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <h1 class="text-xl font-bold text-gray-800 dark:text-white">ایجاد دوره جدید</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">اطلاعات دوره را وارد کنید</p>
+        </div>
+
+        <form method="post" class="p-6 space-y-6" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <!-- Basic Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label asp-for="Title" class="block text-sm font-medium mb-1">عنوان دوره <span class="text-red-500">*</span></label>
+                    <input asp-for="Title" class="w-full px-4 py-2 border rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                    <span asp-validation-for="Title" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label asp-for="ShortDescription" class="block text-sm font-medium mb-1">توضیحات کوتاه</label>
+                    <textarea asp-for="ShortDescription" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                    <span asp-validation-for="ShortDescription" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label asp-for="Description" class="block text-sm font-medium mb-1">توضیحات کامل <span class="text-red-500">*</span></label>
+                    <textarea id="editor" asp-for="Description" rows="10" class="w-full px-4 py-2 border rounded-lg"></textarea>
+                    <span asp-validation-for="Description" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div>
+                    <label asp-for="CategoryId" class="block text-sm font-medium mb-1">دسته‌بندی <span class="text-red-500">*</span></label>
+                    <select asp-for="CategoryId" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))" class="w-full px-4 py-2 border rounded-lg">
+                        <option value="">انتخاب کنید...</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-red-500 text-xs"></span>
+                </div>
+
+                <div>
+                    <label asp-for="CourseType" class="block text-sm font-medium mb-1">نوع دوره</label>
+                    <select asp-for="CourseType" class="w-full px-4 py-2 border rounded-lg">
+                        <option value="1">آنلاین</option>
+                        <option value="2">حضوری</option>
+                        <option value="3">آفلاین</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Pricing -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-bold mb-4">قیمت‌گذاری</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Price" class="block text-sm font-medium mb-1">قیمت (تومان)</label>
+                        <input asp-for="Price" type="number" class="w-full px-4 py-2 border rounded-lg">
+                        <span asp-validation-for="Price" class="text-red-500 text-xs"></span>
+                    </div>
+                    <div>
+                        <label asp-for="DiscountPrice" class="block text-sm font-medium mb-1">قیمت با تخفیف</label>
+                        <input asp-for="DiscountPrice" type="number" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-bold mb-4">زمان‌بندی</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label asp-for="StartDate" class="block text-sm font-medium mb-1">تاریخ شروع</label>
+                        <input asp-for="StartDate" type="date" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label asp-for="EndDate" class="block text-sm font-medium mb-1">تاریخ پایان (اختیاری)</label>
+                        <input asp-for="EndDate" type="date" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label asp-for="DurationHours" class="block text-sm font-medium mb-1">مدت دوره (ساعت)</label>
+                        <input asp-for="DurationHours" type="number" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label asp-for="Capacity" class="block text-sm font-medium mb-1">ظرفیت</label>
+                        <input asp-for="Capacity" type="number" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-bold mb-4">رسانه</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="ImageUrl" class="block text-sm font-medium mb-1">آدرس تصویر دوره</label>
+                        <input asp-for="ImageUrl" class="w-full px-4 py-2 border rounded-lg" placeholder="/images/courses/your-image.jpg">
+                        <p class="text-xs text-gray-500 mt-1">لینک تصویر دوره (می‌توانید از آپلود سنتر استفاده کنید)</p>
+                    </div>
+                    <div>
+                        <label asp-for="IntroVideoUrl" class="block text-sm font-medium mb-1">آدرس ویدیو معرفی</label>
+                        <input asp-for="IntroVideoUrl" class="w-full px-4 py-2 border rounded-lg" placeholder="https://www.youtube.com/embed/...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-bold mb-4">تنظیمات SEO</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="MetaTitle" class="block text-sm font-medium mb-1">عنوان SEO</label>
+                        <input asp-for="MetaTitle" class="w-full px-4 py-2 border rounded-lg" maxlength="70">
+                        <p class="text-xs text-gray-500">حداکثر 70 کاراکتر</p>
+                    </div>
+                    <div>
+                        <label asp-for="MetaDescription" class="block text-sm font-medium mb-1">توضیحات SEO</label>
+                        <textarea asp-for="MetaDescription" rows="2" class="w-full px-4 py-2 border rounded-lg" maxlength="160"></textarea>
+                        <p class="text-xs text-gray-500">حداکثر 160 کاراکتر</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t">
+                <a href="/instructor/courses" class="px-4 py-2 border rounded-lg hover:bg-gray-50">انصراف</a>
+                <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                    <i class="fas fa-save ml-2"></i>ذخیره دوره
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.tiny.cloud/1/your-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: '#editor',
+            height: 400,
+            menubar: false,
+            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+            toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+            directionality: 'rtl',
+            language: 'fa'
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}

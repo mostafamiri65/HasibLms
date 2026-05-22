@@ -1,0 +1,62 @@
+﻿@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.CourseCardDto>
+@{
+    ViewBag.Title = $"نتایج جستجو: {ViewBag.SearchTerm}";
+}
+
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <!-- Search Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">نتایج جستجو</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">
+                @Model.TotalCount نتیجه برای "<span class="font-semibold text-primary-600">@ViewBag.SearchTerm</span>"
+            </p>
+        </div>
+        
+        @if (Model.Items.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @foreach (var course in Model.Items)
+                {
+                    <partial name="_CourseCard" model="course" />
+                }
+            </div>
+            
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="flex justify-center mt-8">
+                    <nav class="flex items-center gap-2">
+                        <a href="?q=@ViewBag.SearchTerm&page=@(Model.PageNumber - 1)"
+                               class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors @(Model.HasPreviousPage ? "" : "opacity-50 pointer-events-none")">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <a href="?q=@ViewBag.SearchTerm&page=@i"
+                                   class="min-w-[40px] h-10 flex items-center justify-center rounded-lg border @(i == Model.PageNumber ? "bg-primary-600 text-white border-primary-600" : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800") transition-colors">
+                                @i
+                            </a>
+                        }
+                        <a href="?q=@ViewBag.SearchTerm&page=@(Model.PageNumber + 1)"
+                               class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors @(Model.HasNextPage ? "" : "opacity-50 pointer-events-none")">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </nav>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl">
+                <i class="fas fa-search text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">نتیجه‌ای یافت نشد</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">متاسفانه دوره‌ای با عبارت "@ViewBag.SearchTerm" پیدا نشد</p>
+                <a href="/course" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+                    <i class="fas fa-arrow-right"></i>
+                    مشاهده همه دوره‌ها
+                </a>
+            </div>
+        }
+    </div>
+</section>

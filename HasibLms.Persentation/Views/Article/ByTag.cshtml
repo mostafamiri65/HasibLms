@@ -1,0 +1,88 @@
+﻿@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.ArticleCardDto>
+@{
+    ViewBag.Title = $"مقالات تگ {ViewBag.TagName}";
+}
+
+<section class="relative bg-gradient-to-br from-primary-700 to-primary-900 py-16">
+    <div class="container mx-auto px-4 text-center text-white">
+        <div class="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 mb-4">
+            <i class="fas fa-tag"></i>
+            <span>تگ</span>
+        </div>
+        <h1 class="text-3xl md:text-5xl font-bold mb-4">#@ViewBag.TagName</h1>
+        <p class="text-white/80 max-w-2xl mx-auto">مقالات مرتبط با موضوع @ViewBag.TagName</p>
+    </div>
+</section>
+
+<div class="container mx-auto px-4 py-12">
+    @if (Model.Items.Any())
+    {
+        <div class="space-y-6">
+            @foreach (var article in Model.Items)
+            {
+                <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+                    <div class="flex flex-col md:flex-row">
+                        @if (!string.IsNullOrEmpty(article.ImageUrl))
+                        {
+                            <div class="md:w-64 h-48 md:h-auto overflow-hidden">
+                                <img src="@article.ImageUrl" alt="@article.Title" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                            </div>
+                        }
+                        <div class="flex-1 p-6">
+                            <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                <span><i class="fas fa-calendar ml-1"></i>@article.PublishedAt.ToString("yyyy/MM/dd")</span>
+                                <span><i class="fas fa-user ml-1"></i>@article.AuthorName</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">
+                                <a href="/article/@article.Slug" class="hover:text-primary-600">@article.Title</a>
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">@article.Summary</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach (var tag in article.Tags)
+                                    {
+                                        <a href="/article/tag/@tag" class="text-xs text-primary-600 bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded-full">
+                                            #@tag
+                                        </a>
+                                    }
+                                </div>
+                                <a href="/article/@article.Slug" class="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1">
+                                    ادامه مطلب <i class="fas fa-arrow-left text-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="flex justify-center mt-8">
+                <nav class="flex items-center gap-2">
+                    <a href="?page=@(Model.PageNumber - 1)" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors @(Model.HasPreviousPage ? "" : "opacity-50 pointer-events-none")">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a href="?page=@i" class="min-w-[40px] h-10 flex items-center justify-center rounded-lg border @(i == Model.PageNumber ? "bg-primary-600 text-white border-primary-600" : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800") transition-colors">
+                            @i
+                        </a>
+                    }
+                    <a href="?page=@(Model.PageNumber + 1)" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors @(Model.HasNextPage ? "" : "opacity-50 pointer-events-none")">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl">
+            <i class="fas fa-tag text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300">هیچ مقاله‌ای با این تگ یافت نشد</h3>
+            <a href="/article" class="inline-block mt-4 px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700">مشاهده همه مقالات</a>
+        </div>
+    }
+</div>

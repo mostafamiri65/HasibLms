@@ -1,0 +1,92 @@
+﻿@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.CourseCardDto>
+@{
+    ViewBag.Title = "دوره‌های من";
+    Layout = "_InstructorLayout";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">دوره‌های من</h1>
+            <p class="text-gray-500 dark:text-gray-400">مدیریت دوره‌های آموزشی شما</p>
+        </div>
+        <a href="/instructor/create-course" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+            <i class="fas fa-plus ml-2"></i>دوره جدید
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var course in Model.Items)
+        {
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all">
+                <div class="relative h-40 overflow-hidden">
+                    <img src="@(course.ImageUrl ?? "/images/course-placeholder.jpg")"
+                         alt="@course.Title"
+                         class="w-full h-full object-cover">
+                    <div class="absolute top-2 right-2">
+                        @if (course.IsPublished)
+                        {
+                            <span class="px-2 py-1 bg-green-500 text-white text-xs rounded-lg">منتشر شده</span>
+                        }
+                        else
+                        {
+                            <span class="px-2 py-1 bg-yellow-500 text-white text-xs rounded-lg">در انتظار تأیید</span>
+                        }
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-gray-800 dark:text-white text-lg mb-1">@course.Title</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-3 line-clamp-2">@course.ShortDescription</p>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1">
+                            <i class="fas fa-users text-gray-400"></i>
+                            <span class="text-sm text-gray-600">@course.EnrolledCount دانشجو</span>
+                        </div>
+                        <div class="flex text-yellow-400">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="fas fa-star @(i <= (int)Math.Floor(course.AverageRating) ? "text-yellow-400" : "text-gray-300")"></i>
+                            }
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="/instructor/edit-course/@course.Id" class="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm hover:bg-blue-100">
+                            <i class="fas fa-edit ml-1"></i>ویرایش
+                        </a>
+                        <a href="/instructor/syllabus?courseId=@course.Id" class="flex-1 text-center px-3 py-2 bg-green-50 text-green-600 rounded-lg text-sm hover:bg-green-100">
+                            <i class="fas fa-list ml-1"></i>سرفصل‌ها
+                        </a>
+                        <a href="/instructor/statistics?courseId=@course.Id" class="flex-1 text-center px-3 py-2 bg-purple-50 text-purple-600 rounded-lg text-sm hover:bg-purple-100">
+                            <i class="fas fa-chart-line ml-1"></i>آمار
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl">
+            <i class="fas fa-graduation-cap text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">هیچ دوره‌ای ایجاد نکرده‌اید</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-4">اولین دوره خود را ایجاد کنید</p>
+            <a href="/instructor/create-course" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700">
+                <i class="fas fa-plus"></i>ایجاد دوره جدید
+            </a>
+        </div>
+    }
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="flex justify-center gap-2 mt-6">
+            <a href="?page=@(Model.PageNumber - 1)" class="px-3 py-2 rounded-lg border @(Model.HasPreviousPage ? "hover:bg-gray-50" : "opacity-50 pointer-events-none")">قبلی</a>
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <a href="?page=@i" class="px-3 py-2 rounded-lg border @(i == Model.PageNumber ? "bg-primary-600 text-white" : "hover:bg-gray-50")">@i</a>
+            }
+            <a href="?page=@(Model.PageNumber + 1)" class="px-3 py-2 rounded-lg border @(Model.HasNextPage ? "hover:bg-gray-50" : "opacity-50 pointer-events-none")">بعدی</a>
+        </div>
+    }
+</div>

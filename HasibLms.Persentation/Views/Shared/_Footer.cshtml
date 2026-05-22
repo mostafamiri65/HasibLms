@@ -1,0 +1,183 @@
+﻿@model HasibLms.Shared.DTOs.Settings.SiteSettingsDto
+@{
+    var currentYear = DateTime.Now.Year;
+}
+
+<footer class="bg-gray-900 text-gray-300 mt-auto">
+    <!-- Main Footer -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            <!-- About Section -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    @if (!string.IsNullOrEmpty(Model?.LogoWhiteUrl))
+                    {
+                        <img src="@Model.LogoWhiteUrl" alt="@Model?.InstituteName" class="h-12 w-auto" />
+                    }
+                    else
+                    {
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary-600 to-primary-800 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-chart-line text-white text-2xl"></i>
+                        </div>
+                    }
+                    <div>
+                        <h3 class="text-white font-bold text-lg">@(Model?.InstituteShortName ?? "مالیبا")</h3>
+                        <p class="text-gray-400 text-xs">@(Model?.Slogan ?? "پیشرو در آموزش مالی")</p>
+                    </div>
+                </div>
+
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    @(Model?.FooterText ?? "بزرگترین پلتفرم آموزش تخصصی حسابداری، مالیات و سرمایه‌گذاری در ایران. با بیش از ۱۰۰۰ دانشجو و ۵۰ مدرس حرفه‌ای.")
+                </p>
+
+                <!-- Social Links -->
+                <div class="flex gap-3">
+                    @if (!string.IsNullOrEmpty(Model?.Instagram))
+                    {
+                        <a href="@Model.Instagram" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-tr hover:from-pink-500 hover:to-orange-500 transition-all duration-300">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.Telegram))
+                    {
+                        <a href="@Model.Telegram" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all duration-300">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.LinkedIn))
+                    {
+                        <a href="@Model.LinkedIn" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.YouTube))
+                    {
+                        <a href="@Model.YouTube" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-red-600 transition-all duration-300">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.WhatsApp))
+                    {
+                        <a href="@Model.WhatsApp" target="_blank" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-all duration-300">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="space-y-4">
+                <h4 class="text-white font-bold text-lg relative inline-block">
+                    دسترسی سریع
+                    <span class="absolute -bottom-2 right-0 w-12 h-0.5 bg-primary-500 rounded-full"></span>
+                </h4>
+                <ul class="space-y-2">
+                    <li><a href="/" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-left text-xs"></i> صفحه اصلی</a></li>
+                    <li><a href="/course" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-left text-xs"></i> دوره‌های آموزشی</a></li>
+                    <li><a href="/article" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-left text-xs"></i> مقالات تخصصی</a></li>
+                    <li><a href="/home/about" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-left text-xs"></i> درباره ما</a></li>
+                    <li><a href="/home/contact" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-left text-xs"></i> تماس با ما</a></li>
+                </ul>
+            </div>
+
+            <!-- Course Categories -->
+            <div class="space-y-4">
+                <h4 class="text-white font-bold text-lg relative inline-block">
+                    دسته‌بندی دوره‌ها
+                    <span class="absolute -bottom-2 right-0 w-12 h-0.5 bg-primary-500 rounded-full"></span>
+                </h4>
+                <ul class="space-y-2" x-data="{ categories: [] }" x-init="fetch('/api/categories').then(r=>r.json()).then(d=>categories=d)">
+                    <template x-for="cat in categories.slice(0,5)">
+                        <li>
+                            <a :href="'/category/' + cat.slug" class="text-gray-400 hover:text-primary-400 transition-colors flex items-center gap-2" x-text="cat.name">
+                            </a>
+                        </li>
+                    </template>
+                    <li class="pt-2">
+                        <a href="/course" class="text-primary-400 hover:text-primary-300 transition-colors text-sm flex items-center gap-1">
+                            همه دوره‌ها <i class="fas fa-arrow-left text-xs"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="space-y-4">
+                <h4 class="text-white font-bold text-lg relative inline-block">
+                    تماس با ما
+                    <span class="absolute -bottom-2 right-0 w-12 h-0.5 bg-primary-500 rounded-full"></span>
+                </h4>
+                <ul class="space-y-3">
+                    @if (!string.IsNullOrEmpty(Model?.Address))
+                    {
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-map-marker-alt text-primary-500 mt-1"></i>
+                            <span class="text-gray-400 text-sm">@Model.Address</span>
+                        </li>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.Phone))
+                    {
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-phone text-primary-500"></i>
+                            <span class="text-gray-400">@Model.Phone</span>
+                        </li>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.Mobile))
+                    {
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-mobile-alt text-primary-500"></i>
+                            <span class="text-gray-400">@Model.Mobile</span>
+                        </li>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.Email))
+                    {
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-primary-500"></i>
+                            <span class="text-gray-400 text-sm break-all">@Model.Email</span>
+                        </li>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.Fax))
+                    {
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-fax text-primary-500"></i>
+                            <span class="text-gray-400">@Model.Fax</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Newsletter Section -->
+        <div class="border-t border-gray-800 mt-10 pt-10">
+            <div class="max-w-2xl mx-auto text-center">
+                <h4 class="text-white font-bold text-lg mb-2">عضویت در خبرنامه</h4>
+                <p class="text-gray-400 text-sm mb-5">اولین نفری باشید که از دوره‌ها و تخفیف‌های ویژه مطلع می‌شوید</p>
+                <form class="flex flex-col sm:flex-row gap-3" action="/newsletter/subscribe" method="post">
+                    <input type="email"
+                           name="email"
+                           placeholder="ایمیل خود را وارد کنید"
+                           class="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white text-sm"
+                           required>
+                    <button type="submit" class="px-6 py-3 bg-primary-600 hover:bg-primary-700 rounded-xl transition-all duration-300 font-medium text-sm shadow-lg hover:shadow-xl">
+                        عضویت
+                    </button>
+                </form>
+                <p class="text-gray-500 text-xs mt-3">با عضویت در خبرنامه، از آخرین تخفیف‌ها و دوره‌های جدید مطلع شوید</p>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-gray-800 mt-10 pt-6 text-center">
+            <p class="text-gray-400 text-sm">
+                @(Model?.CopyrightText ?? $"تمامی حقوق متعلق به {Model?.InstituteName} می‌باشد. © {currentYear}")
+            </p>
+            <div class="flex justify-center gap-4 mt-3">
+                <a href="/home/privacy" class="text-gray-500 hover:text-gray-400 text-xs transition-colors">حریم خصوصی</a>
+                <span class="text-gray-700">|</span>
+                <a href="/home/terms" class="text-gray-500 hover:text-gray-400 text-xs transition-colors">قوانین و مقررات</a>
+                <span class="text-gray-700">|</span>
+                <a href="/home/faq" class="text-gray-500 hover:text-gray-400 text-xs transition-colors">سوالات متداول</a>
+            </div>
+        </div>
+    </div>
+</footer>

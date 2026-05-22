@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Core/">
+    <Project Path="HasibLms.Application/HasibLms.Application.csproj" />
+  </Folder>
+  <Folder Name="/src/Domain/">
+    <Project Path="HasibLms.Domain/HasibLms.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="HasibLms.Persistence/HasibLms.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/src/Persentation/">
+    <Project Path="HasibLms.Persentation/HasibLms.Persentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="HasibLms.Shared/HasibLms.Shared.csproj" />
+  </Folder>
+</Solution>

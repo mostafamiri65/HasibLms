@@ -1,0 +1,242 @@
+﻿@model HasibLms.Shared.DTOs.Auth.UserProfileDto
+@{
+    ViewBag.Title = "پروفایل کاربری";
+    var isAdmin = Model.Roles.Contains("Admin");
+    var isInstructor = Model.Roles.Contains("Instructor");
+}
+
+<div class="container mx-auto px-4 py-12">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-6 text-white mb-8" data-aos="fade-up">
+            <div class="flex items-center gap-4">
+                <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+                    @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                    {
+                        <img src="@Model.AvatarUrl" alt="@Model.FullName" class="w-full h-full rounded-full object-cover">
+                    }
+                    else
+                    {
+                        <i class="fas fa-user text-4xl"></i>
+                    }
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">@Model.FullName</h1>
+                    <p class="text-white/80">@Model.Email</p>
+                    <div class="flex gap-2 mt-2">
+                        @foreach (var role in Model.Roles)
+                        {
+                            <span class="px-2 py-1 bg-white/20 rounded-lg text-xs">@role</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar -->
+            <div class="lg:w-1/3" data-aos="fade-up">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 sticky top-24">
+                    <div class="flex flex-col space-y-2">
+                        <button onclick="showTab('info')" id="tabInfoBtn"
+                                class="text-right px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3">
+                            <i class="fas fa-user w-5"></i>
+                            <span>اطلاعات شخصی</span>
+                        </button>
+                        <button onclick="showTab('security')" id="tabSecurityBtn"
+                                class="text-right px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3">
+                            <i class="fas fa-lock w-5"></i>
+                            <span>امنیت</span>
+                        </button>
+                        @if (!Model.Roles.Contains("Instructor"))
+                        {
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4 mb-4">
+                                <div class="flex items-center justify-between flex-wrap gap-4">
+                                    <div>
+                                        <p class="font-medium text-yellow-800 dark:text-yellow-300">آیا مدرس هستید؟</p>
+                                        <p class="text-sm text-yellow-600 dark:text-yellow-400">با ثبت درخواست مدرس شدن، می‌توانید دوره‌های خود را ایجاد کنید.</p>
+                                    </div>
+                                    <a asp-controller="Auth" asp-action="ApplyForInstructor" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">
+                                        درخواست مدرس شدن
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        @if (isInstructor)
+                        {
+                            <button onclick="showTab('courses')" id="tabCoursesBtn"
+                                    class="text-right px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3">
+                                <i class="fas fa-chalkboard-teacher w-5"></i>
+                                <span>دوره‌های من</span>
+                            </button>
+                        }
+                        <button onclick="showTab('enrollments')" id="tabEnrollmentsBtn"
+                                class="text-right px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3">
+                            <i class="fas fa-book-open w-5"></i>
+                            <span>دوره‌های ثبت نام شده</span>
+                        </button>
+                        <hr class="my-2 dark:border-gray-700">
+                        <a href="/auth/logout"
+                               class="text-right px-4 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 transition-colors flex items-center gap-3">
+                            <i class="fas fa-sign-out-alt w-5"></i>
+                            <span>خروج از حساب</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="lg:w-2/3">
+                <!-- Profile Info Tab -->
+                <div id="tabInfo" class="tab-content">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">اطلاعات شخصی</h2>
+                        <form method="post" asp-controller="Auth" asp-action="UpdateProfile" >
+                            @Html.AntiForgeryToken()
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">نام و نام خانوادگی</label>
+                                    <input type="text" name="FullName" value="@Model.FullName" required
+                                           class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ایمیل</label>
+                                    <input type="email" value="@Model.Email" disabled
+                                           class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-600 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">شماره موبایل</label>
+                                    <input type="tel" name="PhoneNumber" value="@Model.PhoneNumber"
+                                           class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">بیوگرافی</label>
+                                    <textarea name="Bio" rows="3" class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">@Model.Bio</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">لینک LinkedIn</label>
+                                    <input type="url" name="LinkedInUrl" value="@Model.LinkedInUrl"
+                                           class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors">
+                                    ذخیره تغییرات
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div id="tabSecurity" class="tab-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">تغییر رمز عبور</h2>
+                        <form method="post" asp-controller="Auth" asp-action="ChangePassword" >
+                            @Html.AntiForgeryToken()
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">رمز عبور فعلی</label>
+                                    <input type="password" name="CurrentPassword" required
+                                           class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">رمز عبور جدید</label>
+                                    <input type="password" name="NewPassword" required
+                                           class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">تکرار رمز عبور جدید</label>
+                                    <input type="password" name="ConfirmNewPassword" required
+                                           class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors">
+                                    تغییر رمز عبور
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Enrollments Tab -->
+                <div id="tabEnrollments" class="tab-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6" data-aos="fade-up" data-aos-delay="100">
+                        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">دوره‌های ثبت نام شده</h2>
+                        <div id="enrolledCourses">
+                            <div class="text-center py-8">
+                                <div class="spinner mx-auto"></div>
+                                <p class="mt-2 text-gray-500">در حال بارگذاری...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.add('hidden');
+        });
+
+        // Show selected tab
+        document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
+
+        // Load data if needed
+        if (tabName === 'enrollments') {
+            loadEnrolledCourses();
+        }
+    }
+
+    async function loadEnrolledCourses() {
+        try {
+            const response = await fetch('/api/user/enrollments');
+            const courses = await response.json();
+
+            const container = document.getElementById('enrolledCourses');
+            if (courses.length === 0) {
+                container.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-book-open text-5xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">شما هنوز در هیچ دوره‌ای ثبت نام نکرده‌اید</p>
+                            <a href="/course" class="inline-block mt-3 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700">مشاهده دوره‌ها</a>
+                        </div>
+                    `;
+                return;
+            }
+
+            container.innerHTML = courses.map(course => `
+                    <div class="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-700 rounded-xl">
+                        <img src="${course.imageUrl || '/images/course-placeholder.jpg'}" alt="${course.title}" class="w-20 h-20 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800 dark:text-white">${course.title}</h3>
+                            <p class="text-sm text-gray-500">${course.instructorName}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <div class="flex text-yellow-400 text-xs">
+                                    ${Array(5).fill().map((_, i) => `<i class="fas ${i < Math.floor(course.averageRating) ? 'fa-star' : 'fa-star-o'}"></i>`).join('')}
+                                </div>
+                                <span class="text-xs text-gray-500">(${course.enrolledCount} دانشجو)</span>
+                            </div>
+                        </div>
+                        <a href="/course/${course.slug}" class="px-3 py-1.5 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">مشاهده</a>
+                    </div>
+                `).join('');
+        } catch (error) {
+            console.error('Error loading courses:', error);
+            document.getElementById('enrolledCourses').innerHTML = '<div class="text-center py-8 text-red-500">خطا در بارگذاری دوره‌ها</div>';
+        }
+    }
+
+    // Set active tab based on URL hash
+    const hash = window.location.hash.substring(1);
+    if (hash === 'security') {
+        showTab('security');
+    } else if (hash === 'enrollments') {
+        showTab('enrollments');
+    } else {
+        showTab('info');
+    }
+</script>

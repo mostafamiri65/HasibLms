@@ -1,0 +1,185 @@
+﻿@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.Admin.CourseListAdminDto>
+@{
+    ViewBag.Title = "مدیریت دوره‌ها";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">مدیریت دوره‌ها</h1>
+            <p class="text-gray-500 dark:text-gray-400">مدیریت دوره‌های آموزشی</p>
+        </div>
+        <div class="flex gap-2">
+            <select id="statusFilter" onchange="filterByStatus(this.value)" class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <option value="">همه دوره‌ها</option>
+                <option value="published">منتشر شده</option>
+                <option value="pending">در انتظار تأیید</option>
+            </select>
+            <a href="/admin/courses/create" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                <i class="fas fa-plus ml-2"></i>دوره جدید
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">دوره</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">مدرس</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">دسته‌بندی</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">قیمت</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">وضعیت</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach (var course in Model.Items)
+                    {
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                       @*  @if (!string.IsNullOrEmpty(course.ImageUrl))
+                                        {
+                                            <img src="@course.ImageUrl" alt="@course.Title" class="w-full h-full object-cover">
+                                        }
+                                        else
+                                        { *@
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <i class="fas fa-graduation-cap text-gray-400"></i>
+                                            </div>
+                                        @* } *@
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800 dark:text-white">@course.Title</p>
+                                        <p class="text-xs text-gray-500">@course.Slug</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">@course.InstructorName</td>
+                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">@course.CategoryName</td>
+                            <td class="px-6 py-4 font-semibold text-gray-800 dark:text-white">
+                                @if (course.DiscountPrice.HasValue)
+                                {
+                                    <span class="line-through text-gray-400 text-sm">@course.Price.ToString("N0")</span>
+                                    <span class="text-primary-600"> @course.DiscountPrice.Value.ToString("N0")</span>
+                                }
+                                else
+                                {
+                                    <span>@course.Price.ToString("N0")</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-1">
+                                    @if (course.IsPublished)
+                                    {
+                                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">منتشر شده</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">در انتظار</span>
+                                    }
+                                    @if (course.IsFeatured)
+                                    {
+                                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">منتخب</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex gap-2">
+                                    <a href="/admin/courses/edit/@course.Id" class="p-1 text-blue-600 hover:text-blue-700">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="togglePublish('@course.Id', @course.IsPublished.ToString().ToLower())" class="p-1 text-@(course.IsPublished ? "yellow" : "green")-600">
+                                        <i class="fas fa-@(course.IsPublished ? "eye-slash" : "eye")"></i>
+                                    </button>
+                                    <button onclick="toggleFeature('@course.Id', @course.IsFeatured.ToString().ToLower())" class="p-1 text-purple-600">
+                                        <i class="fas fa-@(course.IsFeatured ? "star" : "star-o")"></i>
+                                    </button>
+                                    <button onclick="deleteCourse('@course.Id')" class="p-1 text-red-600">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex justify-center gap-2">
+                    <a href="?page=@(Model.PageNumber - 1)&status=@ViewBag.StatusFilter" class="px-3 py-2 rounded-lg border @(Model.HasPreviousPage ? "hover:bg-gray-50" : "opacity-50 pointer-events-none")">قبلی</a>
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a href="?page=@i&status=@ViewBag.StatusFilter" class="px-3 py-2 rounded-lg border @(i == Model.PageNumber ? "bg-primary-600 text-white" : "hover:bg-gray-50")">@i</a>
+                    }
+                    <a href="?page=@(Model.PageNumber + 1)&status=@ViewBag.StatusFilter" class="px-3 py-2 rounded-lg border @(Model.HasNextPage ? "hover:bg-gray-50" : "opacity-50 pointer-events-none")">بعدی</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function filterByStatus(status) {
+        window.location.href = `/admin/courses?status=${status}`;
+    }
+
+    async function togglePublish(courseId, isPublished) {
+        const response = await fetch('/admin/toggle-publish', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courseId, publish: !isPublished })
+        });
+
+        if (response.ok) {
+            showToast(`دوره ${!isPublished ? 'منتشر' : 'عدم انتشار'} شد`, 'success');
+            setTimeout(() => location.reload(), 500);
+        }
+    }
+
+    async function toggleFeature(courseId, isFeatured) {
+        const response = await fetch('/admin/toggle-feature', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courseId, featured: !isFeatured })
+        });
+
+        if (response.ok) {
+            showToast(`دوره ${!isFeatured ? 'به منتخب‌ها اضافه' : 'از منتخب‌ها حذف'} شد`, 'success');
+            setTimeout(() => location.reload(), 500);
+        }
+    }
+
+    async function deleteCourse(courseId) {
+        const result = await Swal.fire({
+            title: 'حذف دوره',
+            text: 'آیا از حذف این دوره اطمینان دارید؟',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'بله، حذف',
+            cancelButtonText: 'انصراف'
+        });
+
+        if (result.isConfirmed) {
+            const response = await fetch('/admin/delete-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId })
+            });
+
+            if (response.ok) {
+                showToast('دوره با موفقیت حذف شد', 'success');
+                setTimeout(() => location.reload(), 500);
+            } else {
+                showToast('خطا در حذف دوره', 'error');
+            }
+        }
+    }
+</script>

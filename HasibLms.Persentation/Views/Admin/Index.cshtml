@@ -1,0 +1,223 @@
+﻿@model HasibLms.Shared.DTOs.Admin.DashboardStatsDto
+@{
+    ViewBag.Title = "داشبورد مدیریت";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">داشبورد</h1>
+            <p class="text-gray-500 dark:text-gray-400">خلاصه آماری سایت</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="refreshStats()" class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <select id="periodSelect" onchange="changePeriod(this.value)" class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <option value="week">هفته جاری</option>
+                <option value="month" selected>ماه جاری</option>
+                <option value="year">سال جاری</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6" data-aos="fade-up">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">کل کاربران</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">@Model.TotalUsers.ToString("N0")</p>
+                    <p class="text-green-500 text-xs mt-2">
+                        <i class="fas fa-arrow-up"></i> +12%
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">دوره‌ها</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">@Model.TotalCourses.ToString("N0")</p>
+                    <p class="text-green-500 text-xs mt-2">
+                        <i class="fas fa-arrow-up"></i> +@Model.PublishedCourses منتشر شده
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-graduation-cap text-green-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">ثبت‌نام‌ها</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">@Model.TotalEnrollments.ToString("N0")</p>
+                    <p class="text-green-500 text-xs mt-2">
+                        <i class="fas fa-arrow-up"></i> +8%
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-user-graduate text-purple-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">درآمد کل</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">@Model.TotalRevenue.ToString("N0") تومان</p>
+                    <p class="text-green-500 text-xs mt-2">
+                        <i class="fas fa-arrow-up"></i> +23%
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Enrollment Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">آمار ثبت‌نام ماهانه</h3>
+            <canvas id="enrollmentChart" height="250"></canvas>
+        </div>
+
+        <!-- Revenue Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">درآمد ماهانه</h3>
+            <canvas id="revenueChart" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Data Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Popular Courses -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">دوره‌های محبوب</h3>
+            </div>
+            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                @foreach (var course in Model.PopularCourses.Take(5))
+                {
+                    <div class="px-6 py-4 flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-gray-800 dark:text-white">@course.Title</p>
+                            <p class="text-sm text-gray-500">@course.Enrollments ثبت نام</p>
+                        </div>
+                        <p class="font-semibold text-primary-600">@course.Revenue.ToString("N0") تومان</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Pending Reviews -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">نظرات در انتظار تأیید</h3>
+                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-sm">@Model.PendingReviews مورد</span>
+            </div>
+            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                @if (Model.PendingReviews > 0)
+                {
+                    <div class="px-6 py-8 text-center">
+                        <i class="fas fa-comment-dots text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">@Model.PendingReviews نظر در انتظار تأیید است</p>
+                        <a href="/admin/reviews?pending=true" class="inline-block mt-3 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">
+                            بررسی نظرات
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="px-6 py-8 text-center">
+                        <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+                        <p class="text-gray-500">هیچ نظر در انتظار تأییدی وجود ندارد</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let enrollmentChart, revenueChart;
+
+        function initCharts() {
+        const ctx1 = document.getElementById('enrollmentChart').getContext('2d');
+        const ctx2 = document.getElementById('revenueChart').getContext('2d');
+
+        const months = @Html.Raw(Json.Serialize(Model.MonthlyEnrollments.Select(m => m.Month).ToList()));
+        const enrollments = @Html.Raw(Json.Serialize(Model.MonthlyEnrollments.Select(m => m.Count).ToList()));
+        const revenues = @Html.Raw(Json.Serialize(Model.MonthlyRevenueStats.Select(m => m.Amount).ToList()));
+
+        enrollmentChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+        labels: months,
+        datasets: [{
+        label: 'تعداد ثبت‌نام',
+        data: enrollments,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+        legend: { position: 'top' }
+        }
+        }
+        });
+
+        revenueChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+        labels: months,
+        datasets: [{
+        label: 'درآمد (تومان)',
+        data: revenues,
+        backgroundColor: '#10b981',
+        borderRadius: 8
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+        legend: { position: 'top' }
+        }
+        }
+        });
+        }
+
+        async function refreshStats() {
+        const response = await fetch('/admin/get-stats');
+        const data = await response.json();
+        // Update charts with new data
+        }
+
+        function changePeriod(period) {
+        // Fetch data for new period
+        console.log('Period changed to:', period);
+        }
+
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
+}
