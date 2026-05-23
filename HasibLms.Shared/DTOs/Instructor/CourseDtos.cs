@@ -88,24 +88,31 @@ public class CourseEditDto
 	public string? MetaTitle { get; set; }
 	public string? MetaDescription { get; set; }
 }
-
 public class AddSyllabusDto
 {
-	public Guid CourseId { get; set; }
+    [Required(ErrorMessage = "شناسه دوره الزامی است")]
+    public Guid CourseId { get; set; }
 
-	[Required(ErrorMessage = "عنوان سرفصل الزامی است")]
-	public string Title { get; set; } = string.Empty;
+    [Required(ErrorMessage = "عنوان سرفصل الزامی است")]
+    [MaxLength(200, ErrorMessage = "حداکثر 200 کاراکتر")]
+    public string Title { get; set; } = string.Empty;
 
-	public string? Description { get; set; }
+    [MaxLength(500, ErrorMessage = "حداکثر 500 کاراکتر")]
+    public string? Description { get; set; }
 }
 
 public class UpdateSyllabusDto
 {
-	public Guid Id { get; set; }
-	public string Title { get; set; } = string.Empty;
-	public string? Description { get; set; }
-}
+    [Required(ErrorMessage = "شناسه سرفصل الزامی است")]
+    public Guid Id { get; set; }
 
+    [Required(ErrorMessage = "عنوان سرفصل الزامی است")]
+    [MaxLength(200, ErrorMessage = "حداکثر 200 کاراکتر")]
+    public string Title { get; set; } = string.Empty;
+
+    [MaxLength(500, ErrorMessage = "حداکثر 500 کاراکتر")]
+    public string? Description { get; set; }
+}
 public class SyllabusDetailDto
 {
 	public Guid Id { get; set; }

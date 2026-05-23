@@ -150,26 +150,63 @@ public class InstructorController : Controller
 		ViewBag.Course = course;
 		return View(course);
 	}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddSyllabus([FromBody] AddSyllabusDto model, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if ( model.CourseId == Guid.Empty)
+            {
+                return Json(new { success = false, message = "اطلاعات سرفصل معتبر نیست" });
+            }
 
-	[HttpPost]
-	public async Task<IActionResult> AddSyllabus(AddSyllabusDto model, CancellationToken cancellationToken)
-	{
-		var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-		var result = await _courseService.AddSyllabusAsync(model, userId, cancellationToken);
+            if (string.IsNullOrWhiteSpace(model.Title))
+            {
+                return Json(new { success = false, message = "عنوان سرفصل الزامی است" });
+            }
 
-		return Json(new { success = result.Succeeded, message = result.Message, syllabusId = result.Data });
-	}
+            var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
+            var result = await _courseService.AddSyllabusAsync(model, userId, cancellationToken);
 
-	[HttpPost]
-	public async Task<IActionResult> UpdateSyllabus(UpdateSyllabusDto model, CancellationToken cancellationToken)
-	{
-		var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-		var result = await _courseService.UpdateSyllabusAsync(model, userId, cancellationToken);
+            return Json(new { success = result.Succeeded, message = result.Message, syllabusId = result.Data });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding syllabus");
+            return Json(new { success = false, message = "خطا در افزودن سرفصل" });
+        }
+    }
 
-		return Json(new { success = result.Succeeded, message = result.Message });
-	}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateSyllabus([FromBody] UpdateSyllabusDto model, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if ( model.Id == Guid.Empty)
+            {
+                return Json(new { success = false, message = "اطلاعات سرفصل معتبر نیست" });
+            }
 
-	[HttpPost]
+            if (string.IsNullOrWhiteSpace(model.Title))
+            {
+                return Json(new { success = false, message = "عنوان سرفصل الزامی است" });
+            }
+
+            var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
+            var result = await _courseService.UpdateSyllabusAsync(model, userId, cancellationToken);
+
+            return Json(new { success = result.Succeeded, message = result.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating syllabus");
+            return Json(new { success = false, message = "خطا در بروزرسانی سرفصل" });
+        }
+    }
+
+    [HttpPost]
 	public async Task<IActionResult> DeleteSyllabus(Guid syllabusId, CancellationToken cancellationToken)
 	{
 		var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
@@ -203,34 +240,86 @@ public class InstructorController : Controller
 		return View(syllabus);
 	}
 
-	[HttpPost]
-	public async Task<IActionResult> AddLesson(AddLessonDto model, CancellationToken cancellationToken)
-	{
-		var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-		var result = await _courseService.AddLessonAsync(model, userId, cancellationToken);
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddLesson([FromBody] AddLessonDto model, CancellationToken cancellationToken)
+    {
+        try
+        {
+            
+            if (model.SyllabusId == Guid.Empty)
+            {
+                return Json(new { success = false, message = "شناسه سرفصل معتبر نیست" });
+            }
 
-		return Json(new { success = result.Succeeded, message = result.Message, lessonId = result.Data });
-	}
+            if (string.IsNullOrWhiteSpace(model.Title))
+            {
+                return Json(new { success = false, message = "عنوان جلسه الزامی است" });
+            }
 
-	[HttpPost]
-	public async Task<IActionResult> UpdateLesson(UpdateLessonDto model, CancellationToken cancellationToken)
-	{
-		var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-		var result = await _courseService.UpdateLessonAsync(model, userId, cancellationToken);
+            var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
+            var result = await _courseService.AddLessonAsync(model, userId, cancellationToken);
 
-		return Json(new { success = result.Succeeded, message = result.Message });
-	}
+            return Json(new { success = result.Succeeded, message = result.Message, lessonId = result.Data });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding lesson");
+            return Json(new { success = false, message = "خطا در افزودن جلسه: " + ex.Message });
+        }
+    }
 
-	[HttpPost]
-	public async Task<IActionResult> DeleteLesson(Guid lessonId, CancellationToken cancellationToken)
-	{
-		var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
-		var result = await _courseService.DeleteLessonAsync(lessonId, userId, cancellationToken);
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateLesson([FromBody] UpdateLessonDto model, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (model.Id == Guid.Empty)
+            {
+                return Json(new { success = false, message = "اطلاعات جلسه معتبر نیست" });
+            }
 
-		return Json(new { success = result.Succeeded, message = result.Message });
-	}
+            if (string.IsNullOrWhiteSpace(model.Title))
+            {
+                return Json(new { success = false, message = "عنوان جلسه الزامی است" });
+            }
 
-	[HttpPost]
+            var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
+            var result = await _courseService.UpdateLessonAsync(model, userId, cancellationToken);
+
+            return Json(new { success = result.Succeeded, message = result.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating lesson");
+            return Json(new { success = false, message = "خطا در بروزرسانی جلسه" });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteLesson(Guid lessonId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if ( lessonId == Guid.Empty)
+            {
+                return Json(new { success = false, message = "شناسه جلسه معتبر نیست" });
+            }
+
+            var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
+            var result = await _courseService.DeleteLessonAsync(lessonId, userId, cancellationToken);
+
+            return Json(new { success = result.Succeeded, message = result.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting lesson");
+            return Json(new { success = false, message = "خطا در حذف جلسه" });
+        }
+    }
+
+    [HttpPost]
 	public async Task<IActionResult> ReorderLessons(List<Guid> lessonIds, CancellationToken cancellationToken)
 	{
 		var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());

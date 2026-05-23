@@ -140,7 +140,7 @@ public class CourseService : ICourseService
 			if (_cache.TryGetValue(cacheKey, out Guid? courseId) && courseId.HasValue)
 				return await GetCourseDetailAsync(courseId.Value, cancellationToken);
 
-			var course = await _courseRepository.GetSingleAsync(c => c.Slug == slug && c.IsPublished, cancellationToken);
+            var course = await _courseRepository.GetCourseBySlug(slug);
 			if (course == null) return null;
 
 			_cache.Set(cacheKey, course.Id, TimeSpan.FromHours(1));
@@ -176,7 +176,24 @@ public class CourseService : ICourseService
 			var items = new List<CourseCardDto>();
 			foreach (var course in courses)
 			{
-				items.Add(MapToCardDto(course)!);
+				items.Add(new CourseCardDto
+                {
+                    Id = course.Id,
+                    Title = course.Title,
+                    Slug = course.Slug,
+                    ShortDescription = course.ShortDescription,
+                    ImageUrl = course.ImageUrl,
+                    Price = course.Price,
+                    DiscountPrice = course.DiscountPrice,
+                    InstructorName = course.Instructor?.FullName ?? "نامشخص",
+                    InstructorAvatar = course.Instructor?.AvatarUrl ?? string.Empty,
+                    CategoryName = course.Category?.Name ?? "دسته‌بندی نشده",
+                    EnrolledCount = course.Enrollments?.Count(e => !e.IsDeleted) ?? 0,
+                    //AverageRating = course.Reviews?.Where(r => r.IsApproved).Average(r => r.Rating) ?? 0,
+                    ReviewCount = course.Reviews?.Count(r => r.IsApproved) ?? 0,
+                    StartDate = course.StartDate,
+                    IsPublished = course.IsPublished
+                });
 			}
 			var result = new PagedResultDto<CourseCardDto>
 			{
@@ -560,7 +577,7 @@ public class CourseService : ICourseService
 				InstructorAvatar = course.Instructor?.AvatarUrl ?? string.Empty,
 				CategoryName = course.Category?.Name ?? "دسته‌بندی نشده",
 				EnrolledCount = course.Enrollments?.Count(e => !e.IsDeleted) ?? 0,
-				AverageRating = course.Reviews?.Where(r => r.IsApproved).Average(r => r.Rating) ?? 0,
+				//AverageRating = course.Reviews?.Where(r => r.IsApproved).Average(r => r.Rating) ?? 0,
 				ReviewCount = course.Reviews?.Count(r => r.IsApproved) ?? 0,
 				StartDate = course.StartDate,
 				IsPublished = course.IsPublished
@@ -583,16 +600,34 @@ public class CourseService : ICourseService
 			page = page < 1 ? 1 : page;
 			pageSize = pageSize < 1 ? 10 : (pageSize > 100 ? 100 : pageSize);
 
-			var courses = await _courseRepository.GetPagedAsync(page, pageSize,
-				c => c.InstructorId == instructorId && !c.IsDeleted,
-				q => q.OrderByDescending(c => c.CreatedDate),
-				cancellationToken);
+			var courses = await _courseRepository.GetPagedCoursesByInstructorAsync(instructorId, page, pageSize, cancellationToken);
+            courses = courses.Where(x => x.InstructorId == instructorId).ToList();
 
 			var totalCount = await _courseRepository.CountAsync(c => c.InstructorId == instructorId && !c.IsDeleted, cancellationToken);
+            var items = new List<CourseCardDto>();
+            foreach (var course in courses)
+            {
+                items.Add( new CourseCardDto
+                {
+                    Id = course.Id,
+                    Title = course.Title,
+                    Slug = course.Slug,
+                    ShortDescription = course.ShortDescription,
+                    ImageUrl = course.ImageUrl,
+                    Price = course.Price,
+                    DiscountPrice = course.DiscountPrice,
+                    CategoryName = course.Category?.Name ?? "دسته‌بندی نشده",
+                    EnrolledCount = course.Enrollments?.Count(e => !e.IsDeleted) ?? 0,
+                   // AverageRating = course.Reviews?.Where(r => r.IsApproved).Average(r => r.Rating) ?? 0,
+                    ReviewCount = course.Reviews?.Count(r => r.IsApproved) ?? 0,
+                    StartDate = course.StartDate,
+                    IsPublished = course.IsPublished
+                });
+            }
 
-			return new PagedResultDto<CourseCardDto>
+            return new PagedResultDto<CourseCardDto>
 			{
-				Items = courses.Select(c => MapToCardDto(c)).Where(dto => dto != null).ToList()!,
+				Items =items,
 				TotalCount = totalCount,
 				PageNumber = page,
 				PageSize = pageSize

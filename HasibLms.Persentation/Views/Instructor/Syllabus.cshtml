@@ -193,33 +193,75 @@
     document.getElementById('syllabusModal').classList.add('flex');
     }
 
-    async function saveSyllabus() {
-    const id = document.getElementById('syllabusId').value;
-    const courseId = '@course?.Id';
-    const title = document.getElementById('syllabusTitle').value;
-    const description = document.getElementById('syllabusDescription').value;
+       async function saveSyllabus() {
+        const id = document.getElementById('syllabusId').value;
+        const courseId = '@course?.Id';
+        const title = document.getElementById('syllabusTitle').value;
+        const description = document.getElementById('syllabusDescription').value;
 
-    if (!title) {
-    showToast('عنوان سرفصل الزامی است', 'error');
-    return;
-    }
+        if (!title) {
+            Swal.fire({
+                title: 'خطا!',
+                text: 'عنوان سرفصل الزامی است',
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
+            return;
+        }
 
-    const url = id ? '/instructor/update-syllabus' : '/instructor/add-syllabus';
-    const body = id ? { id, title, description } : { courseId, title, description };
+        // نمایش لودینگ
+        Swal.fire({
+            title: 'در حال ذخیره...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
-    const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-    });
+        try {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const url = id ? '/instructor/updatesyllabus' : '/instructor/addsyllabus';
+            const body = id ? { id: id, title: title, description: description } : { courseId: courseId, title: title, description: description };
 
-    const result = await response.json();
-    if (result.success) {
-    showToast(result.message, 'success');
-    setTimeout(() => location.reload(), 500);
-    } else {
-    showToast(result.message, 'error');
-    }
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify(body)
+            });
+
+            const result = await response.json();
+            Swal.close();
+
+            if (result.success) {
+                Swal.fire({
+                    title: 'موفق!',
+                    text: result.message,
+                    icon: 'success',
+                    confirmButtonText: 'باشه'
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: 'خطا!',
+                    text: result.message,
+                    icon: 'error',
+                    confirmButtonText: 'باشه'
+                });
+            }
+        } catch (error) {
+            Swal.close();
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'خطا!',
+                text: 'خطا در ارتباط با سرور',
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
+        }
     }
 
     async function deleteSyllabus(id) {
@@ -233,7 +275,7 @@
     });
 
     if (result.isConfirmed) {
-    const response = await fetch('/instructor/delete-syllabus', {
+    const response = await fetch('/instructor/deletesyllabus', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ syllabusId: id })
@@ -271,40 +313,79 @@
     document.getElementById('lessonModal').classList.remove('hidden');
     document.getElementById('lessonModal').classList.add('flex');
     }
-
     async function saveLesson() {
-    const id = document.getElementById('lessonId').value;
-    const syllabusId = currentSyllabusId;
-    const title = document.getElementById('lessonTitle').value;
-    const durationMinutes = parseInt(document.getElementById('lessonDuration').value) || 0;
-    const videoUrl = document.getElementById('lessonVideoUrl').value;
-    const isPreview = document.getElementById('lessonIsPreview').checked;
-    const content = document.getElementById('lessonContent').value;
+        const id = document.getElementById('lessonId').value;
+        const syllabusId = currentSyllabusId;
+        const title = document.getElementById('lessonTitle').value;
+        const durationMinutes = parseInt(document.getElementById('lessonDuration').value) || 0;
+        const videoUrl = document.getElementById('lessonVideoUrl').value;
+        const isPreview = document.getElementById('lessonIsPreview').checked;
+        const content = document.getElementById('lessonContent').value;
 
-    if (!title) {
-    showToast('عنوان جلسه الزامی است', 'error');
-    return;
+        if (!title) {
+            Swal.fire({
+                title: 'خطا!',
+                text: 'عنوان جلسه الزامی است',
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'در حال ذخیره...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        try {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const url = id ? '/instructor/updatelesson' : '/instructor/addlesson';
+            const body = id
+                ? { id: id, title: title, durationMinutes: durationMinutes, videoUrl: videoUrl, isPreview: isPreview, content: content }
+                : { syllabusId: syllabusId, title: title, durationMinutes: durationMinutes, videoUrl: videoUrl, isPreview: isPreview, content: content };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify(body)
+            });
+
+            const result = await response.json();
+            Swal.close();
+
+            if (result.success) {
+                Swal.fire({
+                    title: 'موفق!',
+                    text: result.message,
+                    icon: 'success',
+                    confirmButtonText: 'باشه'
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: 'خطا!',
+                    text: result.message,
+                    icon: 'error',
+                    confirmButtonText: 'باشه'
+                });
+            }
+        } catch (error) {
+            Swal.close();
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'خطا!',
+                text: 'خطا در ارتباط با سرور',
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
+        }
     }
-
-    const url = id ? '/instructor/update-lesson' : '/instructor/add-lesson';
-    const body = id ? { id, title, durationMinutes, videoUrl, isPreview, content }
-    : { syllabusId, title, durationMinutes, videoUrl, isPreview, content };
-
-    const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-    });
-
-    const result = await response.json();
-    if (result.success) {
-    showToast(result.message, 'success');
-    setTimeout(() => location.reload(), 500);
-    } else {
-    showToast(result.message, 'error');
-    }
-    }
-
     async function deleteLesson(id) {
     const result = await Swal.fire({
     title: 'حذف جلسه',
@@ -316,7 +397,7 @@
     });
 
     if (result.isConfirmed) {
-    const response = await fetch('/instructor/delete-lesson', {
+    const response = await fetch('/instructor/deletelesson', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ lessonId: id })

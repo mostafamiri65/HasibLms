@@ -287,8 +287,12 @@ public class AdminController : Controller
 
 	[HttpPost]
 	[ValidateAntiForgeryToken]
-	public async Task<IActionResult> ReviewInstructorRequest(ReviewInstructorRequestDto model, CancellationToken cancellationToken)
-	{
+	public async Task<IActionResult> ReviewInstructorRequest([FromQuery] Guid requestId, [FromQuery] bool isApproved, [FromQuery] string? rejectReason, CancellationToken cancellationToken)
+    {
+        ReviewInstructorRequestDto model = new ReviewInstructorRequestDto()
+        {
+            IsApproved = isApproved, RejectReason = rejectReason, RequestId = requestId
+        };
 		var adminId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());
 		var result = await _instructorRequestService.ReviewRequestAsync(model.RequestId, model.IsApproved, model.RejectReason, adminId, cancellationToken);
 
@@ -296,7 +300,11 @@ public class AdminController : Controller
 			TempData["Success"] = result.Message;
 		else
 			TempData["Error"] = result.Message;
-
-		return RedirectToAction("InstructorRequests");
+        // اگر درخواست AJAX بود، JSON برگردان
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return Json(new { success = result.Succeeded, message = result.Message });
+        }
+        return RedirectToAction("InstructorRequests");
 	}
 }

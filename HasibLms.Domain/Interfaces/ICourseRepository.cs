@@ -5,6 +5,8 @@ namespace HasibLms.Domain.Interfaces;
 
 public interface ICourseRepository : IGenericRepository<Course>
 {
+    Task<IReadOnlyList<Course>> GetPagedCoursesByInstructorAsync(Guid instructorId, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<Course?> GetCourseBySlug(string slug);
 	Task<Course?> GetCourseWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
 	Task<IReadOnlyList<Course>> GetFeaturedCoursesAsync(int count, CancellationToken cancellationToken = default);
 	Task<IReadOnlyList<Course>> GetCoursesByCategoryAsync(Guid categoryId, int page, int pageSize, CancellationToken cancellationToken = default);

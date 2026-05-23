@@ -10,8 +10,28 @@ public class CourseRepository : GenericRepository<Course>, ICourseRepository
 	public CourseRepository(LmsContext context) : base(context)
 	{
 	}
+    public async Task<IReadOnlyList<Course>> GetPagedCoursesByInstructorAsync(
+        Guid instructorId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .Where(c => !c.IsDeleted && c.InstructorId == instructorId)
+            .Include(c => c.Category)
+            .Include(c => c.Instructor)
+            .Include(c => c.Enrollments)
+            .Include(c => c.Reviews.Where(r => r.IsApproved))
+            .OrderByDescending(c => c.CreatedDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
 
-	public async Task<Course?> GetCourseWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Course?> GetCourseBySlug(string slug)
+    {
+        return await _dbSet
+             .FirstOrDefaultAsync(x => x.Slug == slug && x.IsPublished);
+    }
+
+    public async Task<Course?> GetCourseWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
 	{
 		return await _dbSet
 			.Include(c => c.Category)
@@ -60,8 +80,12 @@ public class CourseRepository : GenericRepository<Course>, ICourseRepository
 		// شروع کوئری با شرط پایه
 		IQueryable<Course> query = _dbSet
 			.Where(c => !c.IsDeleted && c.IsPublished)
-			.Include(c => c.Category)
-			.Include(c => c.Instructor);
+            .Include(c => c.Category)
+            .Include(c => c.Instructor)
+            .Include(c => c.Syllabuses)
+            .ThenInclude(s => s.Lessons)
+            .Include(c => c.Reviews.Where(r => r.IsApproved))
+            .ThenInclude(r => r.Student);
 
 		// فیلتر بر اساس دسته‌بندی
 		if (categoryId.HasValue && categoryId.Value != Guid.Empty)

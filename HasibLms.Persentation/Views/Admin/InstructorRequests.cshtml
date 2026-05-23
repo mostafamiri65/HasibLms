@@ -172,27 +172,76 @@
         const rejectReason = isApproved ? null : document.getElementById('rejectReason').value;
 
         if (!isApproved && !rejectReason) {
-            showToast('لطفاً دلیل رد را وارد کنید', 'error');
+            Swal.fire({
+                title: 'خطا!',
+                text: 'لطفاً دلیل رد را وارد کنید',
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
             return;
         }
 
-        const response = await fetch('/admin/review-instructor-request', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requestId, isApproved, rejectReason })
+        Swal.fire({
+            title: 'در حال پردازش...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
 
-        const result = await response.json();
-        if (result.success) {
-            showToast(result.message, 'success');
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            showToast(result.message, 'error');
+        try {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const url = `/admin/ReviewInstructorRequest?requestId=${requestId}&isApproved=${isApproved}&rejectReason=${encodeURIComponent(rejectReason || '')}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const contentType = response.headers.get('content-type');
+
+            if (contentType && contentType.includes('application/json')) {
+                const result = await response.json();
+                Swal.close();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: 'موفق!',
+                        text: result.message,
+                        icon: 'success',
+                        confirmButtonText: 'باشه'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'خطا!',
+                        text: result.message,
+                        icon: 'error',
+                        confirmButtonText: 'باشه'
+                    });
+                }
+            } else {
+                Swal.close();
+                location.reload();
+            }
+        } catch (error) {
+            Swal.close();
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'خطا!',
+                text: 'خطا در ارتباط با سرور. لطفاً مجدداً تلاش کنید.',
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
         }
     }
 
     function viewDetails(requestId) {
-        window.location.href = `/admin/view-instructor-request/${requestId}`;
+        window.location.href = `/admin/ViewInstructorRequest/${requestId}`;
     }
 
     function closeModal() {

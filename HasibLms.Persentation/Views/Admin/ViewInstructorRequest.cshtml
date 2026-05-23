@@ -1,0 +1,323 @@
+﻿@model HasibLms.Shared.DTOs.Instructor.InstructorRequestListDto
+@{
+    ViewBag.Title = "جزئیات درخواست مدرس شدن";
+    Layout = "_AdminLayout";
+}
+
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-4 bg-gradient-to-r from-primary-600 to-primary-800">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-xl font-bold text-white">جزئیات درخواست</h1>
+                    <p class="text-white/80 text-sm">مشاهده اطلاعات کامل درخواست مدرس شدن</p>
+                </div>
+                <div>
+                    <span class="px-3 py-1 rounded-full text-sm bg-@Model.StatusColor-100 text-@Model.StatusColor-700">
+                        @Model.StatusText
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Personal Info -->
+            <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-user text-primary-600"></i>
+                    اطلاعات شخصی
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-xs text-gray-500">نام و نام خانوادگی</p>
+                        <p class="font-medium">@Model.FullName</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-xs text-gray-500">ایمیل</p>
+                        <p class="font-medium">@Model.Email</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-xs text-gray-500">شماره موبایل</p>
+                        <p class="font-medium">@(Model.PhoneNumber ?? "-")</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-xs text-gray-500">تاریخ درخواست</p>
+                        <p class="font-medium">@Model.RequestedAt.ToString("yyyy/MM/dd - HH:mm")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Info -->
+            <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-briefcase text-primary-600"></i>
+                    اطلاعات حرفه‌ای
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-xs text-gray-500">مدرک تحصیلی</p>
+                        <p class="font-medium">@(Model.Degree ?? "-")</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-xs text-gray-500">دانشگاه</p>
+                        <p class="font-medium">@(Model.University ?? "-")</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-xs text-gray-500">سال‌های تجربه</p>
+                        <p class="font-medium">@(Model.YearsOfExperience?.ToString() ?? "-") سال</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-xs text-gray-500">حوزه تخصصی</p>
+                        <p class="font-medium">@(Model.Expertise ?? "-")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio -->
+            @if (!string.IsNullOrEmpty(Model.Bio))
+            {
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                        <i class="fas fa-align-left text-primary-600"></i>
+                        بیوگرافی
+                    </h2>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">@Model.Bio</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Documents -->
+            <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-file-alt text-primary-600"></i>
+                    مدارک و لینک‌ها
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @if (!string.IsNullOrEmpty(Model.ResumeUrl))
+                    {
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p class="text-xs text-gray-500">فایل رزومه</p>
+                            <a href="@Model.ResumeUrl" target="_blank" class="text-primary-600 hover:underline flex items-center gap-1">
+                                <i class="fas fa-external-link-alt"></i>
+                                مشاهده رزومه
+                            </a>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.CertificateUrl))
+                    {
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p class="text-xs text-gray-500">فایل مدرک</p>
+                            <a href="@Model.CertificateUrl" target="_blank" class="text-primary-600 hover:underline flex items-center gap-1">
+                                <i class="fas fa-external-link-alt"></i>
+                                مشاهده مدرک
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Reject Reason (if rejected) -->
+            @if (!string.IsNullOrEmpty(Model.RejectReason))
+            {
+                <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <p class="text-xs text-red-500">دلیل رد</p>
+                    <p class="text-red-700 dark:text-red-300">@Model.RejectReason</p>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            @if (Model.Status == RequestStatus.Pending)
+            {
+                <div class="flex justify-end gap-3 pt-4 border-t">
+                    <button onclick="reviewRequest('@Model.Id', true)" class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                        <i class="fas fa-check ml-1"></i>تأیید درخواست
+                    </button>
+                    <button onclick="showRejectModal('@Model.Id')" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                        <i class="fas fa-times ml-1"></i>رد درخواست
+                    </button>
+                </div>
+            }
+
+            <div class="flex justify-end">
+                <a href="/admin/instructorrequests" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                    <i class="fas fa-arrow-right ml-1"></i>بازگشت
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6">
+        <h3 class="text-xl font-bold mb-4">رد درخواست</h3>
+        <input type="hidden" id="rejectRequestId">
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">دلیل رد</label>
+            <textarea id="rejectReasonText" rows="3" class="w-full px-4 py-2 border rounded-lg" placeholder="لطفاً دلیل رد را وارد کنید..."></textarea>
+        </div>
+        <div class="flex justify-end gap-3 mt-6">
+            <button onclick="closeRejectModal()" class="px-4 py-2 border rounded-lg">انصراف</button>
+            <button onclick="submitReject()" class="px-4 py-2 bg-red-500 text-white rounded-lg">رد درخواست</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+
+
+    <script>
+        let currentRejectId = null;
+        async function reviewRequest(requestId, isApproved) {
+            // نمایش لودینگ
+            Swal.fire({
+                title: 'در حال پردازش...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const url = `/admin/ReviewInstructorRequest?requestId=${requestId}&isApproved=${isApproved}&rejectReason=`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token,
+                        'X-Requested-With': 'XMLHttpRequest'  // مهم: برای تشخیص AJAX
+                    }
+                });
+
+                // بررسی اینکه پاسخ HTML است یا JSON
+                const contentType = response.headers.get('content-type');
+
+                if (contentType && contentType.includes('application/json')) {
+                    const result = await response.json();
+                    Swal.close();
+
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'موفق!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonText: 'باشه'
+                        }).then(() => {
+                            window.location.href = '/admin/instructorrequests';
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'خطا!',
+                            text: result.message,
+                            icon: 'error',
+                            confirmButtonText: 'باشه'
+                        });
+                    }
+                } else {
+                    // اگر redirect شد، صفحه reload می‌شود
+                    Swal.close();
+                    window.location.href = '/admin/instructorrequests';
+                }
+            } catch (error) {
+                Swal.close();
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'خطا!',
+                    text: 'خطا در ارتباط با سرور. لطفاً مجدداً تلاش کنید.',
+                    icon: 'error',
+                    confirmButtonText: 'باشه'
+                });
+            }
+        }
+
+        function showRejectModal(requestId) {
+            currentRejectId = requestId;
+            document.getElementById('rejectRequestId').value = requestId;
+            document.getElementById('rejectReasonText').value = '';
+            document.getElementById('rejectModal').classList.remove('hidden');
+            document.getElementById('rejectModal').classList.add('flex');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.add('hidden');
+            document.getElementById('rejectModal').classList.remove('flex');
+        }
+
+              async function submitReject() {
+            const requestId = currentRejectId;
+            const rejectReason = document.getElementById('rejectReasonText').value;
+
+            if (!rejectReason) {
+                Swal.fire({
+                    title: 'خطا!',
+                    text: 'لطفاً دلیل رد را وارد کنید',
+                    icon: 'error',
+                    confirmButtonText: 'باشه'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'در حال پردازش...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const url = `/admin/ReviewInstructorRequest?requestId=${requestId}&isApproved=false&rejectReason=${encodeURIComponent(rejectReason)}`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const contentType = response.headers.get('content-type');
+
+                if (contentType && contentType.includes('application/json')) {
+                    const result = await response.json();
+                    Swal.close();
+
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'موفق!',
+                            text: result.message,
+                            icon: 'success',
+                            confirmButtonText: 'باشه'
+                        }).then(() => {
+                            window.location.href = '/admin/instructorrequests';
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'خطا!',
+                            text: result.message,
+                            icon: 'error',
+                            confirmButtonText: 'باشه'
+                        });
+                    }
+                } else {
+                    Swal.close();
+                    window.location.href = '/admin/instructorrequests';
+                }
+            } catch (error) {
+                Swal.close();
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'خطا!',
+                    text: 'خطا در ارتباط با سرور. لطفاً مجدداً تلاش کنید.',
+                    icon: 'error',
+                    confirmButtonText: 'باشه'
+                });
+            }
+        }
+    </script>
+}

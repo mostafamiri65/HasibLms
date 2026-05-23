@@ -77,9 +77,9 @@ public class InstructorRequestService : IInstructorRequestService
 				ResumeUrl = model.ResumeUrl,
 				CertificateUrl = model.CertificateUrl,
 				Status = RequestStatus.Pending,
-				RequestedAt = DateTime.UtcNow,
-				CreatedDate = DateTime.UtcNow,
-				LastModifiedDate = DateTime.UtcNow
+				RequestedAt = DateTime.Now,
+				CreatedDate = DateTime.Now,
+				LastModifiedDate = DateTime.Now
 			};
 
 			await _requestRepository.AddAsync(request, cancellationToken);
@@ -208,9 +208,9 @@ public class InstructorRequestService : IInstructorRequestService
 					request.UserId, adminId, rejectReason);
 			}
 
-			request.ReviewedAt = DateTime.UtcNow;
+			request.ReviewedAt = DateTime.Now;
 			request.ReviewedBy = adminId;
-			request.LastModifiedDate = DateTime.UtcNow;
+			request.LastModifiedDate = DateTime.Now;
 
 			await _requestRepository.UpdateAsync(request, cancellationToken);
 
