@@ -56,8 +56,9 @@
     <title>@(ViewBag.Title != null ? $"{ViewBag.Title} - {settings?.InstituteShortName}" : settings?.InstituteName)</title>
     
     <!-- Tailwind CSS -->
-     <link href="~/css/main.css" rel="stylesheet" /> 
-     <script src="https://cdn.tailwindcss.com"></script> 
+    <script src="https://gcore.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
+
+     @* <script src="https://cdn.tailwindcss.com"></script>  *@
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     

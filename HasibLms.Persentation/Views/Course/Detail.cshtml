@@ -117,72 +117,90 @@
     </div>
 </section>
 
-<!-- Course Content Tabs -->
+<!-- Course Content Tabs - بدون Alpine.js -->
 <section class="py-12">
     <div class="container mx-auto px-4">
-        <div class="flex border-b border-gray-200 dark:border-gray-700 mb-8" x-data="{ activeTab: 'description' }">
-            <button @@click="activeTab = 'description'"
-                :class="activeTab === 'description' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
-                class="px-4 py-2 border-b-2 font-medium transition-colors">
+        <!-- Tab Buttons -->
+        <div class="flex border-b border-gray-200 dark:border-gray-700 mb-8">
+            <button onclick="showTab('description')" id="tabDescriptionBtn"
+                    class="tab-btn px-4 py-2 border-b-2 font-medium transition-colors border-primary-600 text-primary-600">
                 توضیحات دوره
             </button>
-            <button @@click="activeTab = 'syllabus'"
-                :class="activeTab === 'syllabus' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
-                class="px-4 py-2 border-b-2 font-medium transition-colors">
-                سرفصل‌ها
+            <button onclick="showTab('syllabus')" id="tabSyllabusBtn"
+                    class="tab-btn px-4 py-2 border-b-2 font-medium transition-colors border-transparent text-gray-500 hover:text-gray-700">
+                سرفصل‌ها (@Model.Syllabuses.Count)
             </button>
-            <button @@click="activeTab = 'reviews'"
-                :class="activeTab === 'reviews' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
-                class="px-4 py-2 border-b-2 font-medium transition-colors">
+            <button onclick="showTab('reviews')" id="tabReviewsBtn"
+                    class="tab-btn px-4 py-2 border-b-2 font-medium transition-colors border-transparent text-gray-500 hover:text-gray-700">
                 نظرات (@Model.ReviewCount)
             </button>
         </div>
 
         <!-- Description Tab -->
-        <div x-show="activeTab === 'description'" x-transition>
+        <div id="tabDescription" class="tab-content">
             <div class="prose prose-lg dark:prose-invert max-w-none">
                 @Html.Raw(Model.Description)
             </div>
         </div>
 
         <!-- Syllabus Tab -->
-        <div x-show="activeTab === 'syllabus'" x-transition>
+        <div id="tabSyllabus" class="tab-content hidden">
             <div class="space-y-4">
-                @foreach (var syllabus in Model.Syllabuses)
+                @if (Model.Syllabuses != null && Model.Syllabuses.Any())
                 {
-                    <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden" x-data="{ open: @(syllabus.Order == 1 ? "true" : "false") }">
-                        <button @@click="open = !open" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 flex justify-between items-center">
-                            <div class="flex items-center gap-3">
-                                <i class="fas" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                                <span class="font-semibold">بخش @syllabus.Order: @syllabus.Title</span>
-                            </div>
-                            <span class="text-sm text-gray-500">@syllabus.Lessons.Count جلسه</span>
-                        </button>
-                        <div x-show="open" x-transition class="divide-y divide-gray-100 dark:divide-gray-800">
-                            @foreach (var lesson in syllabus.Lessons)
-                            {
-                                <div class="px-6 py-3 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <i class="fas @(lesson.IsPreview ? "fa-play-circle text-primary-600" : "fa-lock text-gray-400")"></i>
-                                        <span>@lesson.Title</span>
-                                        @if (lesson.IsPreview)
-                                        {
-                                            <span class="text-xs text-primary-600">پیش‌نمایش رایگان</span>
-                                        }
-                                    </div>
-                                    <span class="text-sm text-gray-500">@(lesson.DurationMinutes) دقیقه</span>
+                    @foreach (var syllabus in Model.Syllabuses.OrderBy(s => s.Order))
+                    {
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                            <button onclick="toggleSyllabus(this)" 
+                                    class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-chevron-down transition-transform"></i>
+                                    <span class="font-semibold">بخش @syllabus.Order: @syllabus.Title</span>
                                 </div>
-                            }
+                                <span class="text-sm text-gray-500">@syllabus.Lessons.Count جلسه</span>
+                            </button>
+                            <div class="syllabus-content divide-y divide-gray-100 dark:divide-gray-800">
+                                @if (syllabus.Lessons != null && syllabus.Lessons.Any())
+                                {
+                                    @foreach (var lesson in syllabus.Lessons.OrderBy(l => l.Order))
+                                    {
+                                        <div class="px-6 py-3 flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas @(lesson.IsPreview ? "fa-play-circle text-primary-600" : "fa-lock text-gray-400")"></i>
+                                                <span>@lesson.Title</span>
+                                                @if (lesson.IsPreview)
+                                                {
+                                                    <span class="text-xs text-primary-600">پیش‌نمایش رایگان</span>
+                                                }
+                                            </div>
+                                            <span class="text-sm text-gray-500">@(lesson.DurationMinutes) دقیقه</span>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="px-6 py-4 text-center text-gray-500">
+                                        <i class="fas fa-info-circle ml-2"></i>هیچ جلسه‌ای برای این سرفصل تعریف نشده است
+                                    </div>
+                                }
+                            </div>
                         </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <i class="fas fa-folder-open text-5xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">هنوز سرفصلی برای این دوره ثبت نشده است</p>
                     </div>
                 }
             </div>
         </div>
 
         <!-- Reviews Tab -->
-        <div x-show="activeTab === 'reviews'" x-transition>
+        <div id="tabReviews" class="tab-content hidden">
             <div class="space-y-6">
-                @if (Model.Reviews.Any())
+                @if (Model.Reviews != null && Model.Reviews.Any())
                 {
                     @foreach (var review in Model.Reviews)
                     {
@@ -239,75 +257,148 @@
 }
 
 <script>
+    // تابع تغییر تب
+    function showTab(tabName) {
+        // مخفی کردن همه تب‌ها
+        document.getElementById('tabDescription').classList.add('hidden');
+        document.getElementById('tabSyllabus').classList.add('hidden');
+        document.getElementById('tabReviews').classList.add('hidden');
+        
+        // نمایش تب انتخاب شده
+        document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
+        
+        // تغییر استایل دکمه‌ها
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('border-primary-600', 'text-primary-600');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // فعال کردن دکمه انتخاب شده
+        const activeBtn = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Btn');
+        activeBtn.classList.remove('border-transparent', 'text-gray-500');
+        activeBtn.classList.add('border-primary-600', 'text-primary-600');
+    }
+    
+    // تابع باز و بسته کردن سرفصل‌ها
+    function toggleSyllabus(button) {
+        const content = button.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        } else {
+            content.classList.add('hidden');
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        }
+    }
+    
+    // بستن همه سرفصل‌ها در ابتدا (به جز اولین)
+    document.addEventListener('DOMContentLoaded', function() {
+        const syllabusContents = document.querySelectorAll('.syllabus-content');
+        syllabusContents.forEach((content, index) => {
+            if (index === 0) {
+                // اولین سرفصل باز باشد
+                content.classList.remove('hidden');
+                const firstButton = content.previousElementSibling;
+                if (firstButton) {
+                    const icon = firstButton.querySelector('i');
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                }
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+    });
+    
+    // تابع ثبت نام در دوره
     function enrollInCourse(courseId) {
         @if (!isLoggedIn)
-            {
-                <text>
-                    Swal.fire({
-                        title: 'برای ثبت نام وارد شوید',
-                        text: 'لطفاً ابتدا وارد حساب کاربری خود شوید',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'ورود',
-                        cancelButtonText: 'بعداً'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/auth/login?returnUrl=' + encodeURIComponent(window.location.pathname);
-                        }
-                    });
+        {
+            <text>
+                Swal.fire({
+                    title: 'برای ثبت نام وارد شوید',
+                    text: 'لطفاً ابتدا وارد حساب کاربری خود شوید',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ورود',
+                    cancelButtonText: 'بعداً'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/auth/login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                    }
+                });
             </text>
         }
-            else
-            {
-                <text>
-                    Swal.fire({
-                        title: 'ثبت نام در دوره',
-                        html: 'آیا از ثبت نام در این دوره اطمینان دارید؟',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'بله، ثبت نام',
-                        cancelButtonText: 'انصراف'
-                    }).then(async (result) => {
-                        if (result.isConfirmed) {
-                            Swal.fire({
-                                title: 'در حال ثبت نام...',
-                                allowOutsideClick: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                }
-                            });
-
-                            const response = await fetch('/course/enroll', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
-                                },
-                                body: JSON.stringify({ courseId: courseId })
-                            });
-
-                            const data = await response.json();
-
-                            if (data.success) {
-                                Swal.fire({
-                                    title: 'موفق!',
-                                    text: data.message,
-                                    icon: 'success',
-                                    confirmButtonText: 'باشه'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'خطا!',
-                                    text: data.message,
-                                    icon: 'error',
-                                    confirmButtonText: 'باشه'
-                                });
+        else
+        {
+            <text>
+                Swal.fire({
+                    title: 'ثبت نام در دوره',
+                    html: 'آیا از ثبت نام در این دوره اطمینان دارید؟',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'بله، ثبت نام',
+                    cancelButtonText: 'انصراف'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'در حال ثبت نام...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
                             }
+                        });
+
+                        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                        
+                        const response = await fetch('/course/enroll', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({ courseId: courseId })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'موفق!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'باشه'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'خطا!',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonText: 'باشه'
+                            });
                         }
-                    });
+                    }
+                });
             </text>
         }
-        }
+    }
 </script>
+
+<style>
+    .tab-btn {
+        transition: all 0.2s ease;
+    }
+    .tab-btn:hover {
+        color: #2563eb;
+    }
+    .syllabus-content {
+        transition: all 0.3s ease;
+    }
+</style>
