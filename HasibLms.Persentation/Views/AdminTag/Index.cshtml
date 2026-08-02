@@ -1,0 +1,261 @@
+﻿<!-- Views/AdminTag/Index.cshtml -->
+@model List<HasibLms.Shared.DTOs.Admin.TagListDto>
+@{
+    ViewBag.Title = "مدیریت تگ‌ها";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">مدیریت تگ‌ها</h1>
+            <p class="text-gray-500 dark:text-gray-400">مدیریت تگ‌های مقالات</p>
+        </div>
+        <button onclick="showCreateTagModal()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+            <i class="fas fa-plus ml-2"></i>تگ جدید
+        </button>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">نام تگ</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Slug</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">تعداد مقالات</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @if (Model.Any())
+                    {
+                        foreach (var tag in Model)
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">@tag.Name</span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-500">@tag.Slug</td>
+                                <td class="px-6 py-4 text-center">@tag.ArticleCount</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-2">
+                                        <button onclick="editTag('@tag.Id', '@tag.Name')" class="p-1 text-blue-600 hover:text-blue-700">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteTag('@tag.Id')" class="p-1 text-red-600 hover:text-red-700">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4">
+                                <div class="text-center py-16">
+                                    <i class="fas fa-tags text-6xl text-gray-300 mb-4"></i>
+                                    <p class="text-gray-500">هیچ تگی یافت نشد</p>
+                                    <button onclick="showCreateTagModal()" class="mt-3 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                                        <i class="fas fa-plus ml-2"></i>ایجاد اولین تگ
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Tag Modal -->
+<div id="tagModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="if(event.target === this) closeTagModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6">
+        <h3 id="modalTitle" class="text-xl font-bold mb-4">ایجاد تگ جدید</h3>
+        <input type="hidden" id="tagId">
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">نام تگ <span class="text-red-500">*</span></label>
+            <input type="text" id="tagNameInput" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="نام تگ را وارد کنید">
+        </div>
+        <div class="flex justify-end gap-3">
+            <button onclick="closeTagModal()" class="px-4 py-2 border rounded-lg hover:bg-gray-50">انصراف</button>
+            <button onclick="saveTag()" id="saveTagBtn" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                <i class="fas fa-save ml-2"></i>ذخیره
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let isEditing = false;
+
+        function showCreateTagModal() {
+            isEditing = false;
+            document.getElementById('modalTitle').textContent = 'ایجاد تگ جدید';
+            document.getElementById('tagId').value = '';
+            document.getElementById('tagNameInput').value = '';
+            document.getElementById('tagModal').classList.remove('hidden');
+            document.getElementById('tagModal').classList.add('flex');
+            setTimeout(() => document.getElementById('tagNameInput').focus(), 100);
+        }
+
+        function editTag(id, name) {
+            isEditing = true;
+            document.getElementById('modalTitle').textContent = 'ویرایش تگ';
+            document.getElementById('tagId').value = id;
+            document.getElementById('tagNameInput').value = name;
+            document.getElementById('tagModal').classList.remove('hidden');
+            document.getElementById('tagModal').classList.add('flex');
+            setTimeout(() => document.getElementById('tagNameInput').focus(), 100);
+        }
+
+        function closeTagModal() {
+            document.getElementById('tagModal').classList.add('hidden');
+            document.getElementById('tagModal').classList.remove('flex');
+        }
+
+        function getToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        }
+
+        async function saveTag() {
+            const name = document.getElementById('tagNameInput').value.trim();
+            if (!name) {
+                Swal.fire({
+                    title: 'خطا!',
+                    text: 'لطفاً نام تگ را وارد کنید',
+                    icon: 'error',
+                    confirmButtonText: 'باشه'
+                });
+                return;
+            }
+
+            const id = document.getElementById('tagId').value;
+            const url = isEditing ? '/admin/tags/update' : '/admin/tags/create';
+            const data = isEditing ? { id: id, name: name } : { name: name };
+            const token = getToken();
+
+            Swal.fire({
+                title: 'در حال پردازش...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                Swal.close();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: 'موفق!',
+                        text: result.message,
+                        icon: 'success',
+                        confirmButtonText: 'باشه'
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        title: 'خطا!',
+                        text: result.message || 'خطا در ذخیره تگ',
+                        icon: 'error',
+                        confirmButtonText: 'باشه'
+                    });
+                }
+            } catch (error) {
+                Swal.close();
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'خطا!',
+                    text: 'خطا در ارتباط با سرور. لطفاً مجدداً تلاش کنید.',
+                    icon: 'error',
+                    confirmButtonText: 'باشه'
+                });
+            }
+        }
+
+        async function deleteTag(id) {
+            const result = await Swal.fire({
+                title: 'حذف تگ',
+                text: 'آیا از حذف این تگ اطمینان دارید؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف',
+                cancelButtonText: 'انصراف',
+                confirmButtonColor: '#dc2626'
+            });
+
+            if (!result.isConfirmed) return;
+
+            Swal.fire({
+                title: 'در حال حذف...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const token = getToken();
+                const response = await fetch(`/admin/tags/delete?id=${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    }
+                });
+
+                const data = await response.json();
+                Swal.close();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: 'موفق!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'باشه'
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        title: 'خطا!',
+                        text: data.message || 'خطا در حذف تگ',
+                        icon: 'error',
+                        confirmButtonText: 'باشه'
+                    });
+                }
+            } catch (error) {
+                Swal.close();
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'خطا!',
+                    text: 'خطا در ارتباط با سرور. لطفاً مجدداً تلاش کنید.',
+                    icon: 'error',
+                    confirmButtonText: 'باشه'
+                });
+            }
+        }
+
+        // Enter key for modal
+        document.getElementById('tagNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveTag();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeTagModal();
+            }
+        });
+    </script>
+}

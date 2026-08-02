@@ -1,0 +1,292 @@
+﻿<!-- Views/AdminArticle/Index.cshtml -->
+@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.Admin.ArticleListAdminDto>
+@{
+    ViewBag.Title = "مدیریت مقالات";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">مدیریت مقالات</h1>
+            <p class="text-gray-500 dark:text-gray-400">مدیریت مقالات آموزشی سایت</p>
+        </div>
+        <div class="flex gap-2">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="جستجوی مقاله..."
+                       value="@ViewBag.SearchTerm"
+                       class="px-4 py-2 pr-10 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            <a href="/admin/articles/create" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                <i class="fas fa-plus ml-2"></i>مقاله جدید
+            </a>
+        </div>
+    </div>
+
+    <!-- آمار مقالات -->
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+            <p class="text-sm text-gray-500">کل مقالات</p>
+            <p class="text-2xl font-bold">@Model.TotalCount</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+            <p class="text-sm text-gray-500">منتشر شده</p>
+            <p class="text-2xl font-bold text-green-600">@Model.Items.Count(a => a.IsPublished)</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+            <p class="text-sm text-gray-500">پیش‌نویس</p>
+            <p class="text-2xl font-bold text-yellow-600">@Model.Items.Count(a => !a.IsPublished)</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+            <p class="text-sm text-gray-500">منتخب</p>
+            <p class="text-2xl font-bold text-purple-600">@Model.Items.Count(a => a.IsFeatured)</p>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">مقاله</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">نویسنده</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">تگ‌ها</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">بازدید</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">وضعیت</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">تاریخ انتشار</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @foreach (var article in Model.Items)
+                    {
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center">
+                                        @if (!string.IsNullOrEmpty(article.ImageUrl))
+                                        {
+                                            <img src="@article.ImageUrl" alt="@article.Title" class="w-full h-full object-cover">
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-file-alt text-gray-400 text-xl"></i>
+                                        }
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800 dark:text-white line-clamp-1">@article.Title</p>
+                                        <p class="text-xs text-gray-500">@article.Slug</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">@article.AuthorName</td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach (var tag in article.Tags.Take(2))
+                                    {
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">@tag</span>
+                                    }
+                                    @if (article.Tags.Count > 2)
+                                    {
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-500 rounded-full text-xs">+@(article.Tags.Count - 2)</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500 text-center">@article.ViewCount</td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="px-2 py-1 bg-@article.StatusColor-100 text-@article.StatusColor-700 rounded-full text-xs">
+                                        @article.StatusText
+                                    </span>
+                                    @if (article.IsFeatured)
+                                    {
+                                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">منتخب</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500 text-sm">
+                                @(article.PublishedAt?.ToString("yyyy/MM/dd") ?? "-")
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex gap-2">
+                                    <button onclick="togglePublish('@article.Id')"
+                                            class="p-1 text-@(article.IsPublished ? "yellow" : "green")-600 hover:text-@(article.IsPublished ? "yellow" : "green")-700"
+                                            title="@(article.IsPublished ? "عدم انتشار" : "انتشار")">
+                                        <i class="fas fa-@(article.IsPublished ? "eye-slash" : "eye")"></i>
+                                    </button>
+                                    <button onclick="toggleFeature('@article.Id', @article.IsFeatured.ToString().ToLower())"
+                                            class="p-1 text-purple-600 hover:text-purple-700"
+                                            title="منتخب کردن">
+                                        @if (article.IsFeatured)
+                                        {
+                                            <i class="fas fa-star"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star"></i>
+                                        }
+                                    </button>
+                                    <a href="/admin/articles/edit/@article.Id" class="p-1 text-blue-600 hover:text-blue-700" title="ویرایش">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="deleteArticle('@article.Id')" class="p-1 text-red-600 hover:text-red-700" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Items.Any())
+        {
+            <div class="text-center py-16">
+                <i class="fas fa-newspaper text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500">هیچ مقاله‌ای یافت نشد</p>
+                <a href="/admin/articles/create" class="inline-block mt-3 px-4 py-2 bg-primary-600 text-white rounded-lg">
+                    ایجاد اولین مقاله
+                </a>
+            </div>
+        }
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex justify-center gap-2">
+                    <a href="?page=@(Model.PageNumber - 1)&search=@ViewBag.SearchTerm"
+                       class="px-3 py-2 rounded-lg border @(Model.HasPreviousPage ? "hover:bg-gray-50" : "opacity-50 pointer-events-none")">قبلی</a>
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a href="?page=@i&search=@ViewBag.SearchTerm"
+                           class="px-3 py-2 rounded-lg border @(i == Model.PageNumber ? "bg-primary-600 text-white" : "hover:bg-gray-50")">@i</a>
+                    }
+                    <a href="?page=@(Model.PageNumber + 1)&search=@ViewBag.SearchTerm"
+                       class="px-3 py-2 rounded-lg border @(Model.HasNextPage ? "hover:bg-gray-50" : "opacity-50 pointer-events-none")">بعدی</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // جستجو با Enter
+        document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                window.location.href = `/admin/articles?search=${encodeURIComponent(this.value)}`;
+            }
+        });
+
+        // تغییر وضعیت انتشار
+        async function togglePublish(id) {
+            const result = await Swal.fire({
+                title: 'تغییر وضعیت انتشار',
+                text: 'آیا از تغییر وضعیت انتشار این مقاله اطمینان دارید؟',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'بله',
+                cancelButtonText: 'انصراف'
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'در حال پردازش...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                try {
+                    const response = await fetch(`/admin/articles/toggle-publish?id=${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire({ title: 'موفق!', text: data.message, icon: 'success', confirmButtonText: 'باشه' })
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire({ title: 'خطا!', text: data.message, icon: 'error', confirmButtonText: 'باشه' });
+                    }
+                } catch (error) {
+                    Swal.fire({ title: 'خطا!', text: 'خطا در ارتباط با سرور', icon: 'error', confirmButtonText: 'باشه' });
+                }
+            }
+        }
+
+        // تغییر وضعیت منتخب
+        async function toggleFeature(id, isFeatured) {
+            const action = !isFeatured;
+            const actionText = action ? 'افزودن به منتخب‌ها' : 'حذف از منتخب‌ها';
+
+            const result = await Swal.fire({
+                title: actionText,
+                text: `آیا از ${actionText} این مقاله اطمینان دارید؟`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'بله',
+                cancelButtonText: 'انصراف'
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'در حال پردازش...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                try {
+                    const response = await fetch(`/admin/articles/toggle-feature?id=${id}&isFeatured=${action}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire({ title: 'موفق!', text: data.message, icon: 'success', confirmButtonText: 'باشه' })
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire({ title: 'خطا!', text: data.message, icon: 'error', confirmButtonText: 'باشه' });
+                    }
+                } catch (error) {
+                    Swal.fire({ title: 'خطا!', text: 'خطا در ارتباط با سرور', icon: 'error', confirmButtonText: 'باشه' });
+                }
+            }
+        }
+
+        // حذف مقاله
+        async function deleteArticle(id) {
+            const result = await Swal.fire({
+                title: 'حذف مقاله',
+                text: 'آیا از حذف این مقاله اطمینان دارید؟ این عمل قابل بازگشت نیست!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف',
+                cancelButtonText: 'انصراف',
+                confirmButtonColor: '#dc2626'
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'در حال حذف...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                try {
+                    const response = await fetch(`/admin/articles/delete?id=${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire({ title: 'موفق!', text: data.message, icon: 'success', confirmButtonText: 'باشه' })
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire({ title: 'خطا!', text: data.message, icon: 'error', confirmButtonText: 'باشه' });
+                    }
+                } catch (error) {
+                    Swal.fire({ title: 'خطا!', text: 'خطا در ارتباط با سرور', icon: 'error', confirmButtonText: 'باشه' });
+                }
+            }
+        }
+    </script>
+}

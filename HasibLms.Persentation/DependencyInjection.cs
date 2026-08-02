@@ -45,7 +45,7 @@ public static class DependencyInjection
 		services.AddScoped<IReviewService, ReviewService>();
 		services.AddScoped<ISiteService, SiteService>();
 		services.AddScoped<IInstructorRequestService, InstructorRequestService>();
-
+        services.AddScoped<IAdminArticleService, AdminArticleService>();
 		// ==========================================
 		// Caching & Performance
 		// ==========================================

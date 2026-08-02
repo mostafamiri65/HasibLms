@@ -1,0 +1,254 @@
+﻿<!-- Views/AdminArticle/Create.cshtml -->
+@model HasibLms.Shared.DTOs.Admin.CreateArticleAdminDto
+@{
+    ViewBag.Title = "ایجاد مقاله جدید";
+    Layout = "_AdminLayout";
+    var tags = ViewBag.Tags as List<HasibLms.Shared.DTOs.Admin.TagListDto> ?? new();
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">ایجاد مقاله جدید</h1>
+            <p class="text-gray-500 dark:text-gray-400">ایجاد مقاله جدید برای سایت</p>
+        </div>
+        <a href="/admin/articles" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+            <i class="fas fa-arrow-right ml-2"></i>بازگشت
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="articleForm">
+        @Html.AntiForgeryToken()
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">اطلاعات مقاله</h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">عنوان مقاله <span class="text-red-500">*</span></label>
+                            <input type="text" asp-for="Title" class="w-full px-4 py-2 border rounded-lg @(ViewData.ModelState["Title"]?.Errors.Any() == true ? "border-red-500" : "")"
+                                   placeholder="عنوان مقاله را وارد کنید">
+                            <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-1">خلاصه مقاله</label>
+                            <textarea asp-for="Summary" rows="3" class="w-full px-4 py-2 border rounded-lg"
+                                      placeholder="خلاصه مقاله (حداکثر 500 کاراکتر)"></textarea>
+                            <span asp-validation-for="Summary" class="text-red-500 text-sm"></span>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-1">متن مقاله <span class="text-red-500">*</span></label>
+                            <textarea asp-for="Content" id="contentEditor" rows="15" class="w-full px-4 py-2 border rounded-lg"
+                                      placeholder="متن مقاله را وارد کنید..."></textarea>
+                            <span asp-validation-for="Content" class="text-red-500 text-sm"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Image Upload -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">تصویر مقاله</h2>
+
+                    <div class="space-y-4">
+                        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 transition-colors"
+                             id="dropZone">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-500">برای آپلود کلیک کنید یا تصویر را بکشید</p>
+                            <input type="file" asp-for="ImageFile" accept="image/*" class="hidden" id="imageInput">
+                            <p class="text-xs text-gray-400 mt-2">فرمت‌های مجاز: jpg, png, webp</p>
+                        </div>
+                        <div id="imagePreview" class="hidden">
+                            <img id="previewImage" src="" alt="پیش‌نمایش" class="w-full rounded-lg max-h-48 object-cover">
+                            <button type="button" onclick="removeImage()" class="mt-2 text-red-500 text-sm hover:text-red-600">
+                                <i class="fas fa-times ml-1"></i>حذف تصویر
+                            </button>
+                        </div>
+                        <input type="hidden" asp-for="ImageUrl">
+                    </div>
+                </div>
+
+                <!-- Publish Settings -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">تنظیمات انتشار</h2>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium">وضعیت انتشار</label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" asp-for="IsPublished" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-1">تگ‌ها</label>
+                            <div class="flex flex-wrap gap-2 p-2 border rounded-lg min-h-[40px]" id="tagsContainer">
+                                @foreach (var tag in tags)
+                                {
+                                    <span class="tag-item inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm cursor-pointer hover:bg-blue-200"
+                                          data-tag="@tag.Name">
+                                        @tag.Name
+                                        <i class="fas fa-times text-xs hover:text-red-500" onclick="removeTag(this)"></i>
+                                    </span>
+                                }
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <input type="text" id="tagInput" placeholder="نام تگ جدید..."
+                                       class="flex-1 px-3 py-1 border rounded-lg text-sm">
+                                <button type="button" onclick="addTag()" class="px-3 py-1 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">
+                                    افزودن
+                                </button>
+                            </div>
+                            <input type="hidden" asp-for="TagNames" id="tagNamesInput">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                        <i class="fas fa-save ml-2"></i>ذخیره مقاله
+                    </button>
+                    <a href="/admin/articles" class="px-4 py-2 border rounded-lg hover:bg-gray-50">انصراف</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // ============ مدیریت تصویر ============
+        const dropZone = document.getElementById('dropZone');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImage = document.getElementById('previewImage');
+
+        dropZone.addEventListener('click', () => imageInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-primary-500', 'bg-primary-50');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-primary-500', 'bg-primary-50');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-primary-500', 'bg-primary-50');
+            if (e.dataTransfer.files.length) {
+                imageInput.files = e.dataTransfer.files;
+                previewImageFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                previewImageFile(this.files[0]);
+            }
+        });
+
+        function previewImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+                dropZone.classList.add('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            imageInput.value = '';
+            imagePreview.classList.add('hidden');
+            dropZone.classList.remove('hidden');
+            document.querySelector('input[name="ImageUrl"]').value = '';
+        }
+
+        // ============ مدیریت تگ‌ها ============
+        let selectedTags = new Set();
+
+        // بارگذاری تگ‌های انتخاب شده از مدل
+     
+
+        function updateTagNamesInput() {
+            document.getElementById('tagNamesInput').value = Array.from(selectedTags).join(',');
+        }
+
+        function addTag() {
+            const input = document.getElementById('tagInput');
+            const tagName = input.value.trim();
+            if (!tagName) return;
+
+            if (selectedTags.has(tagName)) {
+                Swal.fire({ title: 'تکرار', text: 'این تگ قبلاً اضافه شده است', icon: 'warning', confirmButtonText: 'باشه' });
+                return;
+            }
+
+            selectedTags.add(tagName);
+            createTagElement(tagName);
+            input.value = '';
+            updateTagNamesInput();
+        }
+
+        function createTagElement(tagName) {
+            const container = document.getElementById('tagsContainer');
+            const tagEl = document.createElement('span');
+            tagEl.className = 'tag-item inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm';
+            tagEl.dataset.tag = tagName;
+            tagEl.innerHTML = `${tagName} <i class="fas fa-times text-xs hover:text-red-500" onclick="removeTag(this)"></i>`;
+            container.appendChild(tagEl);
+        }
+
+        function removeTag(element) {
+            const tagItem = element.closest('.tag-item');
+            const tagName = tagItem.dataset.tag;
+            selectedTags.delete(tagName);
+            tagItem.remove();
+            updateTagNamesInput();
+        }
+
+        // اضافه کردن با Enter
+        document.getElementById('tagInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag();
+            }
+        });
+
+        // ============ اعتبارسنجی فرم ============
+        document.getElementById('articleForm').addEventListener('submit', function(e) {
+            updateTagNamesInput();
+        });
+
+        // تابع برای بارگذاری تگ‌های موجود
+        function loadExistingTags() {
+            const container = document.getElementById('tagsContainer');
+            const existingTags = container.querySelectorAll('.tag-item');
+            existingTags.forEach(el => {
+                selectedTags.add(el.dataset.tag);
+            });
+            updateTagNamesInput();
+        }
+
+        // بارگذاری تگ‌های موجود
+        loadExistingTags();
+
+        // ============ ویرایشگر متن ============
+        // اگر از CKEditor یا TinyMCE استفاده می‌کنید، آن را فعال کنید
+        // مثال برای CKEditor:
+        // ClassicEditor.create(document.getElementById('contentEditor')).catch(error => console.error(error));
+    </script>
+}
+
+<!-- Edit.cshtml مشابه Create.cshtml است با تغییرات زیر -->
