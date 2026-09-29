@@ -10,28 +10,28 @@ public class CourseRepository : GenericRepository<Course>, ICourseRepository
 	public CourseRepository(LmsContext context) : base(context)
 	{
 	}
-    public async Task<IReadOnlyList<Course>> GetPagedCoursesByInstructorAsync(
-        Guid instructorId, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
-        return await _dbSet
-            .Where(c => !c.IsDeleted && c.InstructorId == instructorId)
-            .Include(c => c.Category)
-            .Include(c => c.Instructor)
-            .Include(c => c.Enrollments)
-            .Include(c => c.Reviews.Where(r => r.IsApproved))
-            .OrderByDescending(c => c.CreatedDate)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-    }
+	public async Task<IReadOnlyList<Course>> GetPagedCoursesByInstructorAsync(
+		Guid instructorId, int page, int pageSize, CancellationToken cancellationToken = default)
+	{
+		return await _dbSet
+			.Where(c => !c.IsDeleted && c.InstructorId == instructorId)
+			.Include(c => c.Category)
+			.Include(c => c.Instructor)
+			.Include(c => c.Enrollments)
+			.Include(c => c.Reviews.Where(r => r.IsApproved))
+			.OrderByDescending(c => c.CreatedDate)
+			.Skip((page - 1) * pageSize)
+			.Take(pageSize)
+			.ToListAsync(cancellationToken);
+	}
 
-    public async Task<Course?> GetCourseBySlug(string slug)
-    {
-        return await _dbSet
-             .FirstOrDefaultAsync(x => x.Slug == slug && x.IsPublished);
-    }
+	public async Task<Course?> GetCourseBySlug(string slug)
+	{
+		return await _dbSet
+			 .FirstOrDefaultAsync(x => x.Slug == slug && x.IsPublished);
+	}
 
-    public async Task<Course?> GetCourseWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+	public async Task<Course?> GetCourseWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
 	{
 		return await _dbSet
 			.Include(c => c.Category)
@@ -80,12 +80,12 @@ public class CourseRepository : GenericRepository<Course>, ICourseRepository
 		// شروع کوئری با شرط پایه
 		IQueryable<Course> query = _dbSet
 			.Where(c => !c.IsDeleted && c.IsPublished)
-            .Include(c => c.Category)
-            .Include(c => c.Instructor)
-            .Include(c => c.Syllabuses)
-            .ThenInclude(s => s.Lessons)
-            .Include(c => c.Reviews.Where(r => r.IsApproved))
-            .ThenInclude(r => r.Student);
+			.Include(c => c.Category)
+			.Include(c => c.Instructor)
+			.Include(c => c.Syllabuses)
+			.ThenInclude(s => s.Lessons)
+			.Include(c => c.Reviews.Where(r => r.IsApproved))
+			.ThenInclude(r => r.Student);
 
 		// فیلتر بر اساس دسته‌بندی
 		if (categoryId.HasValue && categoryId.Value != Guid.Empty)
@@ -187,5 +187,19 @@ public class CourseRepository : GenericRepository<Course>, ICourseRepository
 		return await _context.CourseReviews
 			.Where(r => r.CourseId == courseId && r.IsApproved && !r.IsDeleted)
 			.ToListAsync(cancellationToken);
+	}
+
+	public async Task<List<Course>> GetCoursesForAdmin(int page, int pageSize, string? status )
+	{
+		int take = pageSize;
+		int skip = (page - 1) * pageSize;
+		var query = _dbSet.Include(x=>x.Instructor)
+			.Include(x=>x.Category).Where(x => !x.IsDeleted);
+		if (!string.IsNullOrEmpty(status))
+		{
+			if (status == "published") query = query.Where(x => x.IsPublished);
+			if (status == "pending") query = query.Where(x => !x.IsPublished);
+		}
+		return await query.Skip(skip).Take(take).ToListAsync();
 	}
 }

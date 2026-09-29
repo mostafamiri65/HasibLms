@@ -20,7 +20,7 @@ public interface ICourseRepository : IGenericRepository<Course>
 		string? searchTerm = null,
 		string? sortBy = null,
 		CancellationToken cancellationToken = default);
-
+	Task<List<Course>> GetCoursesForAdmin(int page, int pageSize, string? status);
 	Task<List<Syllabus>> GetSyllabusByCourseIdAsync(Guid courseId, CancellationToken cancellationToken = default);
 
 	Task<Syllabus?> GetSyllabusWithLessonsAsync(Guid syllabusId, Guid instructorId,

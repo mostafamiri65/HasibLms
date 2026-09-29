@@ -1,0 +1,463 @@
+﻿@model List<HasibLms.Shared.DTOs.Admin.CategoryListAdminDto>
+@using HasibLms.Shared.Extensions
+@{
+    ViewBag.Title = "مدیریت دسته‌بندی‌ها";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
+                <i class="fas fa-folder-tree text-primary-600 ml-2"></i>
+                مدیریت دسته‌بندی‌ها
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">مدیریت دسته‌بندی دوره‌های آموزشی</p>
+        </div>
+        <button onclick="showCreateModal()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+            <i class="fas fa-plus ml-2"></i>دسته‌بندی جدید
+        </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">کل دسته‌بندی‌ها</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">@Model.Count</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-folder text-blue-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">دسته‌های اصلی</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">
+                        @Model.Count(c => c.ParentId == null)
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-folder-open text-green-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">زیردسته‌ها</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white mt-1">
+                        @Model.Count(c => c.ParentId != null)
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-sitemap text-purple-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+        @if (Model.Any())
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">نام</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Slug</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">والد</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">تعداد دوره</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">زیردسته</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">تاریخ ایجاد</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach (var cat in Model)
+                        {
+                            var isChild = cat.ParentId.HasValue;
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        @if (isChild)
+                                        {
+                                            <i class="fas fa-level-up-alt rotate-90 text-gray-400 text-sm"></i>
+                                        }
+                                        <div class="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center">
+                                            <i class="fas @(isChild ? "fa-folder" : "fa-folder-open") text-primary-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800 dark:text-white">@cat.Name</p>
+                                            @if (!string.IsNullOrEmpty(cat.Description))
+                                            {
+                                                <p class="text-xs text-gray-500 line-clamp-1" title="@cat.Description">@cat.Description</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <code class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-600 dark:text-gray-300">@cat.Slug</code>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm">
+                                    @if (!string.IsNullOrEmpty(cat.ParentName))
+                                    {
+                                        <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full text-xs">
+                                            @cat.ParentName
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-gray-400">—</span>
+                                    }
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-1 text-sm @(cat.CourseCount > 0 ? "text-green-600" : "text-gray-400")">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        @cat.CourseCount
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm @(cat.ChildrenCount > 0 ? "text-purple-600" : "text-gray-400")">
+                                        @cat.ChildrenCount
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500">
+                                    @cat.CreatedDate.ToPersianDate()
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex justify-center gap-1">
+                                        <button onclick="showEditModal('@cat.Id')"
+                                                class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                title="ویرایش">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteCategory('@cat.Id', '@cat.Name')"
+                                                class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-16">
+                <div class="w-24 h-24 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-folder-open text-4xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">هیچ دسته‌بندی یافت نشد</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-6">برای شروع، اولین دسته‌بندی را ایجاد کنید</p>
+                <button onclick="showCreateModal()" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+                    <i class="fas fa-plus"></i>
+                    ایجاد دسته‌بندی جدید
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ==================== Create/Edit Modal ==================== -->
+<div id="categoryModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     onclick="if(event.target === this) closeCategoryModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-primary-600 to-primary-800 p-5 text-white relative">
+            <button onclick="closeCategoryModal()"
+                    class="absolute top-4 left-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 id="modalTitle" class="text-lg font-bold">دسته‌بندی جدید</h3>
+            <p id="modalSubtitle" class="text-white/80 text-xs mt-1">اطلاعات دسته‌بندی را وارد کنید</p>
+        </div>
+
+        <!-- Body -->
+        <form id="categoryForm" class="p-5 space-y-4">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="categoryId" name="Id" />
+
+            <div>
+                <label class="block text-sm font-medium mb-1">نام دسته‌بندی <span class="text-red-500">*</span></label>
+                <input type="text" id="categoryName" name="Name"
+                       class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                       placeholder="مثال: حسابداری مالی">
+                <p class="text-xs text-red-500 mt-1 hidden" id="nameError"></p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">Slug (اختیاری)</label>
+                <input type="text" id="categorySlug" name="Slug"
+                       class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono text-sm"
+                       placeholder="اگر خالی بگذارید، خودکار ساخته می‌شود">
+                <p class="text-xs text-gray-400 mt-1">فقط حروف کوچک انگلیسی، اعداد و خط تیره</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">دسته‌بندی والد (اختیاری)</label>
+                <select id="categoryParentId" name="ParentId"
+                        class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    <option value="">— بدون والد (دسته اصلی) —</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">توضیحات (اختیاری)</label>
+                <textarea id="categoryDescription" name="Description" rows="3"
+                          class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                          placeholder="توضیح مختصر"></textarea>
+            </div>
+        </form>
+
+        <!-- Footer -->
+        <div class="flex justify-end gap-2 p-5 pt-0">
+            <button type="button" onclick="closeCategoryModal()"
+                    class="px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                انصراف
+            </button>
+            <button type="button" onclick="saveCategory()" id="saveBtn"
+                    class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+                <i class="fas fa-save ml-2"></i>ذخیره
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentCategoryId = null;
+
+        // ============================================
+        // Modal Management
+        // ============================================
+        function showCreateModal() {
+            currentCategoryId = null;
+            document.getElementById('modalTitle').textContent = 'دسته‌بندی جدید';
+            document.getElementById('modalSubtitle').textContent = 'اطلاعات دسته‌بندی را وارد کنید';
+            document.getElementById('categoryId').value = '';
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categorySlug').value = '';
+            document.getElementById('categoryParentId').value = '';
+            document.getElementById('categoryDescription').value = '';
+            document.getElementById('nameError').classList.add('hidden');
+
+            loadParents();
+            openModal();
+        }
+
+        async function showEditModal(id) {
+            currentCategoryId = id;
+
+            // گرفتن اطلاعات از سرور
+            try {
+                const response = await fetch(`/admin/categories/get/${id}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    Swal.fire('خطا!', result.message, 'error');
+                    return;
+                }
+
+                const data = result.data;
+                document.getElementById('modalTitle').textContent = 'ویرایش دسته‌بندی';
+                document.getElementById('modalSubtitle').textContent = 'اطلاعات را ویرایش کنید';
+                document.getElementById('categoryId').value = data.id;
+                document.getElementById('categoryName').value = data.name;
+                document.getElementById('categorySlug').value = data.slug || '';
+                document.getElementById('categoryDescription').value = data.description || '';
+                document.getElementById('nameError').classList.add('hidden');
+
+                await loadParents(id);
+                document.getElementById('categoryParentId').value = data.parentId || '';
+
+                openModal();
+            } catch (error) {
+                console.error(error);
+                Swal.fire('خطا!', 'خطا در بارگذاری اطلاعات', 'error');
+            }
+        }
+
+        function openModal() {
+            const modal = document.getElementById('categoryModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('categoryName').focus(), 100);
+        }
+
+        function closeCategoryModal() {
+            const modal = document.getElementById('categoryModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeCategoryModal();
+        });
+
+        // ============================================
+        // Load Parent Categories
+        // ============================================
+        async function loadParents(excludeId = null) {
+            const select = document.getElementById('categoryParentId');
+            select.innerHTML = '<option value="">— بدون والد (دسته اصلی) —</option>';
+
+            try {
+                const url = excludeId
+                    ? `/admin/categories/available-parents?excludeId=${excludeId}`
+                    : '/admin/categories/all';
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) {
+                    result.data.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.id;
+                        option.textContent = cat.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading parents', error);
+            }
+        }
+
+        // ============================================
+        // Save Category
+        // ============================================
+        async function saveCategory() {
+            const name = document.getElementById('categoryName').value.trim();
+            const slug = document.getElementById('categorySlug').value.trim();
+            const parentId = document.getElementById('categoryParentId').value;
+            const description = document.getElementById('categoryDescription').value.trim();
+
+            // اعتبارسنجی
+            if (!name) {
+                Swal.fire('خطا!', 'نام دسته‌بندی الزامی است', 'warning');
+                document.getElementById('categoryName').focus();
+                return;
+            }
+
+            const isEdit = !!currentCategoryId;
+            const url = isEdit ? '/admin/categories/update' : '/admin/categories/create';
+
+            // ساخت FormData
+            const formData = new FormData();
+            if (isEdit) formData.append('Id', currentCategoryId);
+            formData.append('Name', name);
+            if (slug) formData.append('Slug', slug);
+            if (parentId) formData.append('ParentId', parentId);
+            if (description) formData.append('Description', description);
+            formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+            // لودینگ
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال ذخیره...';
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: 'موفق!',
+                        text: result.message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire('خطا!', result.message || 'خطا در ذخیره', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire('خطا!', 'خطا در ارتباط با سرور', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        }
+
+        // ============================================
+        // Delete Category
+        // ============================================
+        async function deleteCategory(id, name) {
+            const result = await Swal.fire({
+                title: 'حذف دسته‌بندی',
+                html: `آیا از حذف دسته‌بندی <strong>"${name}"</strong> اطمینان دارید؟<br><small class="text-gray-500">این عمل قابل بازگشت نیست</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف',
+                cancelButtonText: 'انصراف',
+                confirmButtonColor: '#dc2626'
+            });
+
+            if (!result.isConfirmed) return;
+
+            Swal.fire({
+                title: 'در حال حذف...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const response = await fetch(`/admin/categories/delete?id=${id}`, {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: 'موفق!',
+                        text: data.message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire('خطا!', data.message, 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire('خطا!', 'خطا در ارتباط با سرور', 'error');
+            }
+        }
+
+        // اضافه کردن Enter key به فیلد نام
+        document.getElementById('categoryName').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveCategory();
+            }
+        });
+    </script>
+
+    <style>
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+}

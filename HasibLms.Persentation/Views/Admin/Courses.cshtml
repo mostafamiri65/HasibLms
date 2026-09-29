@@ -16,7 +16,7 @@
                 <option value="published" selected="@(ViewBag.StatusFilter == "published")">منتشر شده</option>
                 <option value="pending" selected="@(ViewBag.StatusFilter == "pending")">در انتظار تأیید</option>
             </select>
-            <a href="/admin/courses/create" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+            <a href="/admin/createcourse" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
                 <i class="fas fa-plus ml-2"></i>دوره جدید
             </a>
         </div>
@@ -94,7 +94,7 @@
                                             <i class="fas fa-eye-slash"></i>
                                         </button>
                                     }
-                                    
+
                                     <!-- دکمه منتخب کردن -->
                                     <button onclick="toggleFeature('@course.Id', @course.IsFeatured.ToString().ToLower())" class="p-1 text-purple-600 hover:text-purple-700" title="منتخب کردن">
                                         @if (course.IsFeatured)
@@ -106,12 +106,12 @@
                                             <i class="far fa-star"></i>
                                         }
                                     </button>
-                                    
+
                                     <!-- دکمه ویرایش -->
-                                    <a href="/admin/courses/edit/@course.Id" class="p-1 text-blue-600 hover:text-blue-700" title="ویرایش">
+                                    <a href="/admin/EditCourse/@course.Id" class="p-1 text-blue-600 hover:text-blue-700" title="ویرایش">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    
+
                                     <!-- دکمه حذف -->
                                     <button onclick="deleteCourse('@course.Id')" class="p-1 text-red-600 hover:text-red-700" title="حذف">
                                         <i class="fas fa-trash"></i>
@@ -378,5 +378,5 @@
             }
         }
     </script>
-    
+
 }

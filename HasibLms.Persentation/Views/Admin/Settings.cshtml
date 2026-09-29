@@ -12,7 +12,7 @@
 
     <form method="post" action="/admin/settings" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
-        
+
         <div class="space-y-6">
             <!-- Basic Info -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
@@ -139,6 +139,93 @@
                     </div>
                 </div>
             </div>
+
+            @{
+    var homeSections = new[]
+    {
+        // new { Name = "ShowFeaturedCourses", Label = "دوره‌های منتخب", Icon = "fa-star", Value = Model?.ShowFeaturedCourses ?? true },
+        new { Name = "ShowLatestCourses", Label = "آخرین دوره‌ها", Icon = "fa-clock", Value = Model?.ShowLatestCourses ?? true },
+        new { Name = "ShowPopularCourses", Label = "دوره‌های محبوب", Icon = "fa-fire", Value = Model?.ShowPopularCourses ?? true },
+        new { Name = "ShowCategories", Label = "دسته‌بندی‌ها", Icon = "fa-th-large", Value = Model?.ShowCategories ?? true },
+        new { Name = "ShowLatestArticles", Label = "آخرین مقالات", Icon = "fa-newspaper", Value = Model?.ShowLatestArticles ?? true },
+        // new { Name = "ShowPopularArticles", Label = "مقالات محبوب", Icon = "fa-fire-alt", Value = Model?.ShowPopularArticles ?? true },
+        new { Name = "ShowStats", Label = "آمار و ارقام", Icon = "fa-chart-bar", Value = Model?.ShowStats ?? true },
+        new { Name = "ShowTestimonials", Label = "نظرات دانشجویان", Icon = "fa-quote-right", Value = Model?.ShowTestimonials ?? true },
+    };
+}
+
+<!-- ==================== Home Page Visibility ==================== -->
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/40 rounded-lg flex items-center justify-center">
+            <i class="fas fa-eye text-primary-600"></i>
+        </div>
+        <div>
+            <h2 class="text-lg font-bold text-gray-800 dark:text-white">نمایش بخش‌های صفحه اصلی</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">انتخاب کنید کدام بخش‌ها در صفحه اصلی نمایش داده شوند</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        @foreach (var sec in homeSections)
+        {
+            <div class="flex items-center justify-between gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <i class="fas @sec.Icon text-primary-600 w-5 text-center"></i>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">@sec.Label</span>
+                </div>
+
+                <!-- ✅ استفاده از select برای ارسال مطمئن true/false -->
+                <select name="@sec.Name"
+                        class="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer @(sec.Value ? "text-green-600 border-green-300" : "text-gray-500")">
+                    <option value="true" selected="@(sec.Value == true)">نمایش</option>
+                    <option value="false" selected="@(sec.Value == false)">مخفی</option>
+                </select>
+            </div>
+        }
+    </div>
+
+    <!-- تعداد نمایش -->
+    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900/40 rounded-lg flex items-center justify-center">
+                <i class="fas fa-hashtag text-primary-600 text-sm"></i>
+            </div>
+            <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">تعداد آیتم‌های نمایش داده شده</h3>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">تعداد دوره‌های منتخب</label>
+                <input type="number" name="HomeFeaturedCoursesCount"
+                       value="@(Model?.HomeFeaturedCoursesCount ?? 6)"
+                       min="1" max="20"
+                       class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">تعداد آخرین دوره‌ها</label>
+                <input type="number" name="HomeLatestCoursesCount"
+                       value="@(Model?.HomeLatestCoursesCount ?? 6)"
+                       min="1" max="20"
+                       class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">تعداد دوره‌های محبوب</label>
+                <input type="number" name="HomePopularCoursesCount"
+                       value="@(Model?.HomePopularCoursesCount ?? 6)"
+                       min="1" max="20"
+                       class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">تعداد مقالات</label>
+                <input type="number" name="HomeArticlesCount"
+                       value="@(Model?.HomeArticlesCount ?? 3)"
+                       min="1" max="20"
+                       class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+            </div>
+        </div>
+    </div>
+</div>
 
             <div class="flex justify-end">
                 <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">

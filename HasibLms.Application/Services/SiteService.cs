@@ -100,7 +100,25 @@ public class SiteService : ISiteService
 			settings.CopyrightText = model.CopyrightText;
 			settings.AllowRegistration = model.AllowRegistration;
 			settings.CurrencySymbol = model.CurrencySymbol;
-			settings.LastUpdated = DateTime.UtcNow;
+
+			settings.ShowFeaturedCourses = model.ShowFeaturedCourses;
+			settings.ShowLatestCourses = model.ShowLatestCourses;
+			settings.ShowPopularCourses = model.ShowPopularCourses;
+			settings.ShowCategories = model.ShowCategories;
+			settings.ShowLatestArticles = model.ShowLatestArticles;
+			settings.ShowPopularArticles = model.ShowPopularArticles;
+			settings.ShowStats = model.ShowStats;
+			settings.ShowTestimonials = model.ShowTestimonials;
+
+			settings.HomeFeaturedCoursesCount = model.HomeFeaturedCoursesCount;
+			settings.HomeLatestCoursesCount = model.HomeLatestCoursesCount;
+			settings.HomePopularCoursesCount = model.HomePopularCoursesCount;
+			settings.HomeArticlesCount = model.HomeArticlesCount;
+
+			settings.ShowWhyChooseUs = model.ShowWhyChooseUs;
+			settings.WhyChooseUsTitle = model.WhyChooseUsTitle;
+			settings.WhyChooseUsSubtitle = model.WhyChooseUsSubtitle;
+			settings.LastUpdated = DateTime.Now;
 			settings.LastUpdatedBy = userId;
 
 			await _siteSettingsRepository.UpdateAsync(settings, cancellationToken);
@@ -163,7 +181,24 @@ public class SiteService : ISiteService
 			FooterText = settings.FooterText,
 			CopyrightText = settings.CopyrightText,
 			AllowRegistration = settings.AllowRegistration,
-			CurrencySymbol = settings.CurrencySymbol
+			CurrencySymbol = settings.CurrencySymbol,
+			ShowFeaturedCourses = settings.ShowFeaturedCourses,
+			ShowLatestCourses = settings.ShowLatestCourses,
+			ShowPopularCourses = settings.ShowPopularCourses,
+			ShowCategories = settings.ShowCategories,
+			ShowLatestArticles = settings.ShowLatestArticles,
+			ShowPopularArticles = settings.ShowPopularArticles,
+			ShowStats = settings.ShowStats,
+			ShowTestimonials = settings.ShowTestimonials,
+
+			HomeFeaturedCoursesCount = settings.HomeFeaturedCoursesCount,
+			HomeLatestCoursesCount = settings.HomeLatestCoursesCount,
+			HomePopularCoursesCount = settings.HomePopularCoursesCount,
+			HomeArticlesCount = settings.HomeArticlesCount,
+
+			//ShowWhyChooseUs = settings.ShowWhyChooseUs,
+			//WhyChooseUsTitle = settings.WhyChooseUsTitle,
+			//WhyChooseUsSubtitle = settings.WhyChooseUsSubtitle,
 		};
 	}
 

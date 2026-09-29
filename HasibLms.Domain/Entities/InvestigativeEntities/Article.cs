@@ -14,6 +14,7 @@ public class Article : BaseEntity
 	public ArticleType ArticleType { get; set; }
 	public bool IsPublished { get; set; }
 	public DateTime PublishedAt { get; set; } = DateTime.UtcNow;
+	public bool FeatureStatus { get; set; } = false;
 
 	// SEO
 	public string? MetaTitle { get; set; }

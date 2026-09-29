@@ -35,7 +35,44 @@ public class AdminArticleController : Controller
         return View(articles);
     }
 
-    [HttpGet("create")]
+	[IgnoreAntiforgeryToken]
+	[HttpPost("upload-image")]
+	[RequestSizeLimit(5 * 1024 * 1024)]
+	public async Task<IActionResult> UploadImage(IFormFile upload)
+	{
+		if (upload == null || upload.Length == 0)
+			return Json(new { uploaded = 0, error = new { message = "فایلی انتخاب نشده است" } });
+
+		var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+		var ext = Path.GetExtension(upload.FileName).ToLowerInvariant();
+		if (!allowedExtensions.Contains(ext))
+			return Json(new { uploaded = 0, error = new { message = "فرمت فایل مجاز نیست" } });
+
+		if (upload.Length > 5 * 1024 * 1024)
+			return Json(new { uploaded = 0, error = new { message = "حجم فایل نباید بیشتر از ۵ مگابایت باشد" } });
+
+		var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "articles");
+		Directory.CreateDirectory(uploadsFolder);
+
+		var fileName = $"{Guid.NewGuid():N}{ext}";
+		var filePath = Path.Combine(uploadsFolder, fileName);
+
+		using (var stream = new FileStream(filePath, FileMode.Create))
+		{
+			await upload.CopyToAsync(stream);
+		}
+
+		var url = $"/uploads/articles/{fileName}";
+
+		// ✅ فرمت پاسخ مورد نیاز CKEditor 4
+		return Json(new
+		{
+			uploaded = 1,
+			fileName = fileName,
+			url = url
+		});
+	}
+	[HttpGet("create")]
     public async Task<IActionResult> Create(CancellationToken cancellationToken)
     {
         ViewBag.Title = "ایجاد مقاله جدید";

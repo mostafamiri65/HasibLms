@@ -14,152 +14,268 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - پنل مدیریت</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
-    
+
     <!-- Sweet Alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    <!-- Persian Datepicker -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <style>
-        * { font-family: 'Vazirmatn', sans-serif; }
-        [x-cloak] { display: none !important; }
-        .sidebar-item.active { background-color: #3b82f6; color: white; }
-        .sidebar-item.active i { color: white; }
+            /* Fix toggle switches */
+            .peer:checked ~ div {
+                background-color: #22c55e !important; /* green-500 */
+            }
+
+                .peer:checked ~ div::after {
+                    transform: translateX(20px);
+                }
+
+            .peer ~ div::after {
+                content: '';
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                background: white;
+                border-radius: 9999px;
+                height: 20px;
+                width: 20px;
+                transition: all 0.2s;
+            }
+
+            .peer ~ div {
+                position: relative;
+            }
+    </style>
+    <style>
+            * {
+                font-family: 'Vazirmatn', sans-serif;
+            }
+
+            [x-cloak] {
+                display: none !important;
+            }
+
+            .sidebar-item.active {
+                background-color: #3b82f6;
+                color: white;
+            }
+
+                .sidebar-item.active i {
+                    color: white;
+                }
+    </style>
+    <!-- Dynamic Color Scheme -->
+    <style>
+            :root {
+                --primary-50: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 10%, white);
+                --primary-100: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 20%, white);
+                --primary-200: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 40%, white);
+                --primary-300: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 60%, white);
+                --primary-400: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 80%, white);
+                --primary-500: @(settings?.PrimaryColor ?? "#3b82f6");
+                --primary-600: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 80%, black);
+                --primary-700: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 60%, black);
+                --primary-800: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 40%, black);
+                --primary-900: color-mix(in srgb, @(settings?.PrimaryColor ?? "#3b82f6") 20%, black);
+                --secondary-500: @(settings?.SecondaryColor ?? "#10b981");
+            }
+
+            /* Custom color classes using CSS variables */
+            .bg-primary {
+                background-color: var(--primary-500);
+            }
+
+            .bg-primary-dark {
+                background-color: var(--primary-700);
+            }
+
+            .text-primary {
+                color: var(--primary-500);
+            }
+
+            .border-primary {
+                border-color: var(--primary-500);
+            }
+
+            .hover\:bg-primary:hover {
+                background-color: var(--primary-600);
+            }
+
+            .hover\:text-primary:hover {
+                color: var(--primary-500);
+            }
+
+            /* Override Tailwind colors */
+            .bg-primary-600 {
+                background-color: var(--primary-600);
+            }
+
+            .bg-primary-700 {
+                background-color: var(--primary-700);
+            }
+
+            .text-primary-600 {
+                color: var(--primary-600);
+            }
+
+            .hover\:bg-primary-700:hover {
+                background-color: var(--primary-700);
+            }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900">
-<div class="flex h-screen" x-data="{ sidebarOpen: true }">
-    <!-- Sidebar -->
-    <aside class="bg-white dark:bg-gray-800 shadow-xl w-64 transition-all duration-300" :class="sidebarOpen ? 'w-64' : 'w-20'">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div x-show="sidebarOpen">
-                <span class="text-xl font-bold text-primary-600">@(settings?.InstituteShortName ?? "مالیبا")</span>
-                <span class="text-xs text-gray-500 block">پنل مدیریت</span>
-            </div>
-            <button @@click="sidebarOpen = !sidebarOpen" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-            
-        <nav class="p-4 space-y-2">
-            <a href="/admin" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-chart-line w-5"></i>
-                <span x-show="sidebarOpen">داشبورد</span>
-            </a>
-            <a href="/admin/users" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-users w-5"></i>
-                <span x-show="sidebarOpen">کاربران</span>
-            </a>
-            <a asp-controller="admin" asp-action="instructorRequests" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-chalkboard-user w-5"></i>
-                <span x-show="sidebarOpen">درخواست‌های مدرس</span>
-            </a>
-            <a href="/admin/courses" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-graduation-cap w-5"></i>
-                <span x-show="sidebarOpen">دوره‌ها</span>
-            </a>
-            <!-- ====== منوی مقالات ====== -->
-            <a href="/admin/articles" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-newspaper w-5"></i>
-                <span x-show="sidebarOpen">مقالات</span>
-            </a>
-    
-            <!-- ====== منوی تگ‌ها ====== -->
-            <a href="/admin/tags" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-tags w-5"></i>
-                <span x-show="sidebarOpen">تگ‌ها</span>
-            </a>
-
-            <a href="/admin/reviews" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-star w-5"></i>
-                <span x-show="sidebarOpen">نظرات</span>
-            </a>
-            <a href="/admin/settings" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-cog w-5"></i>
-                <span x-show="sidebarOpen">تنظیمات</span>
-            </a>
-        </nav>
-    </aside>
-        
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Header -->
-        <header class="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold text-gray-800 dark:text-white">@ViewBag.Title</h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-                        <span class="text-white font-medium">@(user?.FullName?.Substring(0,1) ?? "A")</span>
-                    </div>
-                    <div class="hidden md:block">
-                        <p class="text-sm font-medium text-gray-800 dark:text-white">@user?.FullName</p>
-                        <p class="text-xs text-gray-500">مدیر سیستم</p>
-                    </div>
+    <div class="flex h-screen" x-data="{ sidebarOpen: true }">
+        <!-- Sidebar -->
+        <aside class="bg-white dark:bg-gray-800 shadow-xl w-64 transition-all duration-300" :class="sidebarOpen ? 'w-64' : 'w-20'">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div x-show="sidebarOpen">
+                    <span class="text-xl font-bold text-primary-600">@(settings?.InstituteShortName ?? "مالیبا")</span>
+                    <span class="text-xs text-gray-500 block">پنل مدیریت</span>
                 </div>
-                <a href="/" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <i class="fas fa-home"></i>
-                </a>
-                <form action="/auth/logout" method="post" class="inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                </form>
+                <button @@click="sidebarOpen = !sidebarOpen" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
-        </header>
-            
-        <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto p-6">
-            @RenderBody()
-        </main>
-    </div>
-</div>
 
-<script>
-    function showToast(message, type = 'success') {
-        // ایجاد المنت موقت برای نمایش
-        const toast = document.createElement('div');
-        const colors = {
-            success: 'bg-green-500',
-            error: 'bg-red-500',
-            warning: 'bg-yellow-500',
-            info: 'bg-blue-500'
-        };
-        const icons = {
-            success: 'fa-check-circle',
-            error: 'fa-exclamation-circle',
-            warning: 'fa-exclamation-triangle',
-            info: 'fa-info-circle'
-        };
-        
-        toast.className = `fixed bottom-4 right-4 z-50 ${colors[type]} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-x-full`;
-        toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.classList.remove('translate-x-full');
-            toast.classList.add('translate-x-0');
-        }, 10);
-        
-        setTimeout(() => {
-            toast.classList.remove('translate-x-0');
-            toast.classList.add('translate-x-full');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-</script>
+            <nav class="p-4 space-y-2">
+                <a href="/admin" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span x-show="sidebarOpen">داشبورد</span>
+                </a>
+                <a href="/admin/users" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-users w-5"></i>
+                    <span x-show="sidebarOpen">کاربران</span>
+                </a>
+                <a asp-controller="admin" asp-action="instructorRequests" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-chalkboard-user w-5"></i>
+                    <span x-show="sidebarOpen">درخواست‌های مدرس</span>
+                </a>
+                <a href="/admin/courses" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-graduation-cap w-5"></i>
+                    <span x-show="sidebarOpen">دوره‌ها</span>
+                </a>
+                <a href="/admin/categories" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+    <i class="fas fa-folder-tree w-5"></i>
+    <span x-show="sidebarOpen">دسته‌بندی‌ها</span>
+</a>
+                <!-- ====== منوی مقالات ====== -->
+                <a href="/admin/articles" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-newspaper w-5"></i>
+                    <span x-show="sidebarOpen">مقالات</span>
+                </a>
+
+                <!-- ====== منوی تگ‌ها ====== -->
+                <a href="/admin/tags" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-tags w-5"></i>
+                    <span x-show="sidebarOpen">تگ‌ها</span>
+                </a>
+                <a href="/admin/menu" class="flex items-center p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    <i class="fas fa-bars w-5 h-5 ml-3"></i>
+                    <span>مدیریت منوها</span>
+                </a>
+
+                <a href="/admin/why-choose-us" class="flex items-center p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    <i class="fas fa-star w-5 h-5 ml-3"></i>
+                    <span>چرا ما را انتخاب کنید؟</span>
+                </a>
+
+
+                <a href="/admin/reviews" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-star w-5"></i>
+                    <span x-show="sidebarOpen">نظرات</span>
+                </a>
+                <a href="/admin/settings" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-cog w-5"></i>
+                    <span x-show="sidebarOpen">تنظیمات</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800 dark:text-white">@ViewBag.Title</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium">@(user?.FullName?.Substring(0, 1) ?? "A")</span>
+                        </div>
+                        <div class="hidden md:block">
+                            <p class="text-sm font-medium text-gray-800 dark:text-white">@user?.FullName</p>
+                            <p class="text-xs text-gray-500">مدیر سیستم</p>
+                        </div>
+                    </div>
+                    <a href="/" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <form action="/auth/logout" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </form>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+    <!-- Persian Datepicker Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <script>
+            function showToast(message, type = 'success') {
+                // ایجاد المنت موقت برای نمایش
+                const toast = document.createElement('div');
+                const colors = {
+                    success: 'bg-green-500',
+                    error: 'bg-red-500',
+                    warning: 'bg-yellow-500',
+                    info: 'bg-blue-500'
+                };
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+
+                toast.className = `fixed bottom-4 right-4 z-50 ${colors[type]} text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-x-full`;
+                toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-full');
+                    toast.classList.add('translate-x-0');
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-0');
+                    toast.classList.add('translate-x-full');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+    </script>
     <script src="~/js/site.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

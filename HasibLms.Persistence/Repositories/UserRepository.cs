@@ -89,4 +89,9 @@ public class UserRepository : IUserRepository
 		if (user == null) return false;
 		return await _userManager.IsInRoleAsync(user, role);
 	}
+	public async Task<List<User>> GetUsersInRoleAsync(string role, CancellationToken cancellationToken = default)
+	{
+		var users = await _userManager.GetUsersInRoleAsync(role);
+		return users.ToList();
+	}
 }

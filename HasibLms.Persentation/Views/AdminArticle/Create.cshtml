@@ -29,7 +29,8 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">عنوان مقاله <span class="text-red-500">*</span></label>
-                            <input type="text" asp-for="Title" class="w-full px-4 py-2 border rounded-lg @(ViewData.ModelState["Title"]?.Errors.Any() == true ? "border-red-500" : "")"
+                            <input type="text" asp-for="Title"
+                                   class="w-full px-4 py-2 border rounded-lg @(ViewData.ModelState["Title"]?.Errors.Any() == true ? "border-red-500" : "")"
                                    placeholder="عنوان مقاله را وارد کنید">
                             <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
                         </div>
@@ -43,9 +44,9 @@
 
                         <div>
                             <label class="block text-sm font-medium mb-1">متن مقاله <span class="text-red-500">*</span></label>
-                            <textarea asp-for="Content" id="contentEditor" rows="15" class="w-full px-4 py-2 border rounded-lg"
-                                      placeholder="متن مقاله را وارد کنید..."></textarea>
-                            <span asp-validation-for="Content" class="text-red-500 text-sm"></span>
+                            <!-- ویرایشگر CKEditor اینجا قرار می‌گیرد -->
+                            <textarea asp-for="Content" id="contentEditor" name="Content" class="w-full"></textarea>
+                            <input type="hidden" asp-for="Content" id="contentHidden" />
                         </div>
                     </div>
                 </div>
@@ -53,39 +54,31 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- Image Upload -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">تصویر مقاله</h2>
-
-                    <div class="space-y-4">
-                        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 transition-colors"
-                             id="dropZone">
-                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-500">برای آپلود کلیک کنید یا تصویر را بکشید</p>
-                            <input type="file" asp-for="ImageFile" accept="image/*" class="hidden" id="imageInput">
-                            <p class="text-xs text-gray-400 mt-2">فرمت‌های مجاز: jpg, png, webp</p>
-                        </div>
-                        <div id="imagePreview" class="hidden">
-                            <img id="previewImage" src="" alt="پیش‌نمایش" class="w-full rounded-lg max-h-48 object-cover">
-                            <button type="button" onclick="removeImage()" class="mt-2 text-red-500 text-sm hover:text-red-600">
-                                <i class="fas fa-times ml-1"></i>حذف تصویر
-                            </button>
-                        </div>
-                        <input type="hidden" asp-for="ImageUrl">
-                    </div>
-                </div>
-
                 <!-- Publish Settings -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
                     <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">تنظیمات انتشار</h2>
 
                     <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <label class="text-sm font-medium">وضعیت انتشار</label>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" asp-for="IsPublished" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                            </label>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div>
+                                <label class="text-sm font-medium">وضعیت انتشار</label>
+                                <p class="text-xs text-gray-500">@(Model?.IsPublished == true ? "منتشر شده" : "پیش‌نویس")</p>
+                            </div>
+                            <select asp-for="IsPublished" class="px-3 py-1.5 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+                                <option value="true">منتشر</option>
+                                <option value="false">پیش‌نویس</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div>
+                                <label class="text-sm font-medium">مقاله منتخب</label>
+                                <p class="text-xs text-gray-500">نمایش در بخش مقالات منتخب</p>
+                            </div>
+                            <select asp-for="IsFeatured" class="px-3 py-1.5 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+                                <option value="true">بله</option>
+                                <option value="false">خیر</option>
+                            </select>
                         </div>
 
                         <div>
@@ -103,7 +96,8 @@
                             <div class="flex gap-2 mt-2">
                                 <input type="text" id="tagInput" placeholder="نام تگ جدید..."
                                        class="flex-1 px-3 py-1 border rounded-lg text-sm">
-                                <button type="button" onclick="addTag()" class="px-3 py-1 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">
+                                <button type="button" onclick="addTag()"
+                                        class="px-3 py-1 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">
                                     افزودن
                                 </button>
                             </div>
@@ -126,60 +120,55 @@
 
 @section Scripts {
     <script>
-        // ============ مدیریت تصویر ============
-        const dropZone = document.getElementById('dropZone');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImage = document.getElementById('previewImage');
-
-        dropZone.addEventListener('click', () => imageInput.click());
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-primary-500', 'bg-primary-50');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-primary-500', 'bg-primary-50');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-primary-500', 'bg-primary-50');
-            if (e.dataTransfer.files.length) {
-                imageInput.files = e.dataTransfer.files;
-                previewImageFile(e.dataTransfer.files[0]);
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof CKEDITOR === 'undefined') {
+                console.error('CKEDITOR is not defined');
+                Swal.fire({ title: 'خطا', text: 'ویرایشگر بارگذاری نشد', icon: 'error' });
+                return;
             }
+
+            const editor = CKEDITOR.replace('contentEditor', {
+                language: 'fa',
+                height: 500,
+                resize_enabled: true,
+                contentsLangDirection: 'rtl',
+                // ❌ هیچ extraPlugins نگذارید
+                filebrowserUploadUrl: '/admin/articles/upload-image',
+                filebrowserImageUploadUrl: '/admin/articles/upload-image',
+                toolbar: [
+                    { name: 'document', items: ['Source', '-', 'Preview', 'Print'] },
+                    { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+                    { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
+                    '/',
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'] },
+                    { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                    { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'] },
+                    '/',
+                    { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+                    { name: 'colors', items: ['TextColor', 'BGColor'] },
+                    { name: 'tools', items: ['Maximize', 'ShowBlocks'] }
+                ],
+                on: {
+                    instanceReady: function (ev) {
+                        console.log('CKEditor 4 ready');
+                        const hiddenInput = document.getElementById('contentHidden');
+                        if (hiddenInput && hiddenInput.value) {
+                            ev.editor.setData(hiddenInput.value);
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('articleForm').addEventListener('submit', function () {
+                document.getElementById('contentHidden').value = editor.getData();
+            });
         });
 
-        imageInput.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                previewImageFile(this.files[0]);
-            }
-        });
-
-        function previewImageFile(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-                dropZone.classList.add('hidden');
-            }
-            reader.readAsDataURL(file);
-        }
-
-        function removeImage() {
-            imageInput.value = '';
-            imagePreview.classList.add('hidden');
-            dropZone.classList.remove('hidden');
-            document.querySelector('input[name="ImageUrl"]').value = '';
-        }
-
-        // ============ مدیریت تگ‌ها ============
+        // ============================================
+        // مدیریت تگ‌ها
+        // ============================================
         let selectedTags = new Set();
-
-        // بارگذاری تگ‌های انتخاب شده از مدل
-     
 
         function updateTagNamesInput() {
             document.getElementById('tagNamesInput').value = Array.from(selectedTags).join(',');
@@ -206,7 +195,7 @@
             const tagEl = document.createElement('span');
             tagEl.className = 'tag-item inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm';
             tagEl.dataset.tag = tagName;
-            tagEl.innerHTML = `${tagName} <i class="fas fa-times text-xs hover:text-red-500" onclick="removeTag(this)"></i>`;
+            tagEl.innerHTML = `${tagName} <i class="fas fa-times text-xs hover:text-red-500 cursor-pointer" onclick="removeTag(this)"></i>`;
             container.appendChild(tagEl);
         }
 
@@ -218,7 +207,6 @@
             updateTagNamesInput();
         }
 
-        // اضافه کردن با Enter
         document.getElementById('tagInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -226,12 +214,7 @@
             }
         });
 
-        // ============ اعتبارسنجی فرم ============
-        document.getElementById('articleForm').addEventListener('submit', function(e) {
-            updateTagNamesInput();
-        });
-
-        // تابع برای بارگذاری تگ‌های موجود
+        // بارگذاری تگ‌های موجود
         function loadExistingTags() {
             const container = document.getElementById('tagsContainer');
             const existingTags = container.querySelectorAll('.tag-item');
@@ -241,14 +224,6 @@
             updateTagNamesInput();
         }
 
-        // بارگذاری تگ‌های موجود
         loadExistingTags();
-
-        // ============ ویرایشگر متن ============
-        // اگر از CKEditor یا TinyMCE استفاده می‌کنید، آن را فعال کنید
-        // مثال برای CKEditor:
-        // ClassicEditor.create(document.getElementById('contentEditor')).catch(error => console.error(error));
     </script>
 }
-
-<!-- Edit.cshtml مشابه Create.cshtml است با تغییرات زیر -->

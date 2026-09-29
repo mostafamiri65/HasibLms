@@ -1,0 +1,91 @@
+﻿@model HasibLms.Shared.DTOs.Settings.UpdateMenuItemDto
+@{
+    ViewBag.Title = "ویرایش منو";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">@ViewBag.Title</h1>
+        <p class="text-gray-500 dark:text-gray-400">ویرایش آیتم منو</p>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+        <form method="post" action="/admin/menu/edit">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" value="@Model.Id" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">عنوان منو <span class="text-red-500">*</span></label>
+                    <input type="text" name="Title" value="@Model.Title" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" required />
+                    @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-red-500 text-sm mt-1" })
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">آدرس URL</label>
+                    <input type="text" name="Url" value="@Model.Url" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" placeholder="مثال: /course" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">آیکون (FontAwesome)</label>
+                    <input type="text" name="Icon" value="@Model.Icon" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" placeholder="fas fa-home" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">باز شدن در</label>
+                    <select name="Target" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                        <option value="_self" selected="@(Model.Target == "_self")">همان صفحه</option>
+                        <option value="_blank" selected="@(Model.Target == "_blank")">صفحه جدید</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">منوی والد</label>
+                    <select name="ParentId" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                        <option value="">بدون والد (منوی اصلی)</option>
+                        @if (ViewBag.ParentItems != null)
+                        {
+                            foreach (var parent in ViewBag.ParentItems as List<HasibLms.Shared.DTOs.Settings.MenuItemDto> ?? new ())
+                            {
+                                <option value="@parent.Id" selected="@(Model.ParentId == parent.Id)">
+                                    @parent.Title
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">وضعیت</label>
+                    <select name="IsActive" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                        <option value="true" selected="@Model.IsActive">فعال</option>
+                        <option value="false" selected="@(!Model.IsActive)">غیرفعال</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">موقعیت</label>
+                    <select name="Location" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                        <option value="header" selected="@(Model.Location == "header")">هدر</option>
+                        <option value="footer" selected="@(Model.Location == "footer")">فوتر</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">کلاس CSS سفارشی</label>
+                    <input type="text" name="CssClass" value="@Model.CssClass" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white" placeholder="مثال: font-bold text-red-500" />
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <a href="/admin/menu" class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                    انصراف
+                </a>
+                <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all">
+                    <i class="fas fa-save ml-2"></i>بروزرسانی
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

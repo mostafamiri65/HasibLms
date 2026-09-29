@@ -1,0 +1,176 @@
+﻿@model HasibLms.Shared.DTOs.Settings.WhyChooseUsSettingsDto
+@{
+    ViewBag.Title = "مدیریت بخش 'چرا ما؟'";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">مدیریت بخش 'چرا باید ما را انتخاب کنید؟'</h1>
+            <p class="text-gray-500 dark:text-gray-400">مدیریت آیتم‌های نمایش داده شده در صفحه اصلی</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="toggleSection()" class="px-4 py-2 @(Model.ShowSection ? "bg-red-500" : "bg-green-500") text-white rounded-lg hover:opacity-80">
+                @if (Model.ShowSection)
+                {
+                    <i class="fas fa-eye-slash ml-2"></i>
+                    <span>
+                        مخفی کردن بخش
+                    </span>
+                }
+                else
+                {
+                    <i class="fas fa-eye ml-2"></i>
+                    <span>
+                        نمایش بخش
+                    </span>
+                }
+            </button>
+            <a href="/admin/why-choose-us/create" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                <i class="fas fa-plus ml-2"></i>افزودن آیتم جدید
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.ShowSection)
+    {
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 text-yellow-800 dark:text-yellow-200">
+            <i class="fas fa-exclamation-triangle ml-2"></i>
+            این بخش در صفحه اصلی مخفی است. برای نمایش آن روی دکمه "نمایش بخش" کلیک کنید.
+        </div>
+    }
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+        <div class="sortable-container space-y-3">
+            @if (!Model.Items.Any())
+            {
+                <div class="text-center py-8 text-gray-400 dark:text-gray-500">
+                    <i class="fas fa-plus-circle text-4xl block mb-3"></i>
+                    <span>هیچ آیتمی تعریف نشده است. برای افزودن کلیک کنید.</span>
+                </div>
+            }
+            else
+            {
+                foreach (var item in Model.Items.OrderBy(i => i.Order))
+                {
+                    <div class="why-item bg-gray-50 dark:bg-gray-700 rounded-xl p-4 flex items-center justify-between" data-id="@item.Id">
+                        <div class="flex items-center gap-4 flex-1">
+                            <i class="fas fa-grip-vertical text-gray-400 cursor-move"></i>
+                            <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                                <i class="@(item.Icon ?? "fas fa-star")"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-800 dark:text-white">@item.Title</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">@item.Description</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                @if (!item.IsActive)
+                                {
+                                    <span class="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded-full">غیرفعال</span>
+                                }
+                                @if (!item.ShowOnHomePage)
+                                {
+                                    <span class="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">مخفی در صفحه اصلی</span>
+                                }
+                                <a href="/admin/why-choose-us/edit/@item.Id" class="text-blue-500 hover:text-blue-700">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button onclick="deleteItem('@item.Id')" class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.sortable-container');
+            if (container) {
+                new Sortable(container, {
+                    animation: 150,
+                    handle: '.fa-grip-vertical',
+                    onEnd: function(evt) {
+                        const items = container.querySelectorAll('.why-item');
+                        const ids = Array.from(items).map(item => item.dataset.id);
+
+                        fetch('/admin/why-choose-us/reorder', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify(ids)
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    showToast(data.message, 'success');
+                                } else {
+                                    showToast(data.message, 'error');
+                                }
+                            })
+                            .catch(() => {
+                                showToast('خطا در تغییر ترتیب', 'error');
+                            });
+                    }
+                });
+            }
+        });
+
+        function deleteItem(id) {
+            Swal.fire({
+                title: 'آیا مطمئن هستید؟',
+                text: 'این آیتم حذف خواهد شد',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف کن',
+                cancelButtonText: 'لغو'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/why-choose-us/delete?id=${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                location.reload();
+                            } else {
+                                showToast(data.message, 'error');
+                            }
+                        });
+                }
+            });
+        }
+
+        function toggleSection() {
+            const currentShow = @Model.ShowSection.ToString().ToLower();
+            fetch(`/admin/why-choose-us/toggle-section?show=${!currentShow}`, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        location.reload();
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                });
+        }
+    </script>
+}

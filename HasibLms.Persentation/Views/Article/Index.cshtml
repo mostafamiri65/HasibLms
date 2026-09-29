@@ -1,4 +1,5 @@
-﻿@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.ArticleCardDto>
+﻿@using HasibLms.Shared.Extensions
+@model HasibLms.Shared.DTOs.PagedResultDto<HasibLms.Shared.DTOs.ArticleCardDto>
 @{
     ViewBag.Title = "مقالات آموزشی";
 }
@@ -37,7 +38,7 @@
                                     <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
                                         <div class="flex items-center gap-1">
                                             <i class="fas fa-calendar"></i>
-                                            <span>@article.PublishedAt.ToString("yyyy/MM/dd")</span>
+                                            <span>@article.PublishedAt.ToPersianDateFull()</span>
                                         </div>
                                         <div class="flex items-center gap-1">
                                             <i class="fas fa-user"></i>
@@ -152,7 +153,7 @@
                 </div>
             </div>
 
-            <!-- Tags -->
+        @*     <!-- Tags -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
                 <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
                     <i class="fas fa-tags ml-2"></i>
@@ -167,7 +168,7 @@
                         </a>
                     }
                 </div>
-            </div>
+            </div> *@
         </div>
     </div>
 </div>

@@ -31,7 +31,8 @@ public static class DependencyInjection
 		services.AddScoped<ITagRepository, TagRepository>();
 		services.AddScoped<ISiteSettingsRepository, SiteSettingsRepository>();
 		services.AddScoped<IInstructorRequestRepository, InstructorRequestRepository>();
-
+		services.AddScoped<IMenuItemRepository, MenuItemRepository>();
+		services.AddScoped<IWhyChooseUsRepository, WhyChooseUsRepository>();
 		// ==========================================
 		// Services
 		// ==========================================
@@ -46,6 +47,9 @@ public static class DependencyInjection
 		services.AddScoped<ISiteService, SiteService>();
 		services.AddScoped<IInstructorRequestService, InstructorRequestService>();
         services.AddScoped<IAdminArticleService, AdminArticleService>();
+		services.AddScoped<IMenuService, MenuService>();
+		services.AddScoped<IWhyChooseUsService, WhyChooseUsService>();
+		services.AddScoped<IAdminCategoryService, AdminCategoryService>();
 		// ==========================================
 		// Caching & Performance
 		// ==========================================

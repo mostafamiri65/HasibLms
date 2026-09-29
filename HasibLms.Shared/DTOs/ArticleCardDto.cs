@@ -12,6 +12,7 @@ public class ArticleCardDto
 	public string? AuthorAvatar { get; set; }
 	public int ViewCount { get; set; }
 	public List<string> Tags { get; set; } = new();
+	public bool IsFeatured { get; set; }
 }
 
 public class ArticleDetailDto : ArticleCardDto

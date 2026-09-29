@@ -4,6 +4,8 @@
 @{
     var settings = await SiteService.GetSettingsAsync();
     ViewBag.Title = settings?.InstituteName ?? "صفحه اصلی";
+    var whyChooseUs = ViewBag.WhyChooseUs as HasibLms.Shared.DTOs.Settings.WhyChooseUsSettingsDto;
+
 }
 
 <!-- Hero Section با افکت پارالاکس -->
@@ -88,121 +90,119 @@
     </div>
 </section>
 
-<!-- Features Section -->
-<section class="py-20 bg-gray-50 dark:bg-gray-900/50">
-    <div class="container mx-auto px-4">
-        <div class="text-center max-w-3xl mx-auto mb-12" data-aos="fade-up">
-            <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">چرا مالیبا؟</span>
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
-                چرا باید ما را انتخاب کنید؟
-            </h2>
-            <p class="text-gray-500 dark:text-gray-400 mt-4">
-                ما با ارائه بهترین خدمات و محتوای آموزشی با کیفیت، تجربه یادگیری متفاوتی را برای شما فراهم می‌کنیم
-            </p>
-        </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="100">
-                <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
-                    <i class="fas fa-chalkboard-teacher text-3xl text-primary-600 group-hover:text-white transition-colors"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">اساتید مجرب</h3>
-                <p class="text-gray-500 dark:text-gray-400">بهره‌مندی از بهترین اساتید با سال‌ها تجربه تدریس</p>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="200">
-                <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
-                    <i class="fas fa-video text-3xl text-primary-600 group-hover:text-white transition-colors"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">محتوای آفلاین و آنلاین</h3>
-                <p class="text-gray-500 dark:text-gray-400">دسترسی به محتوا در هر زمان و مکانی</p>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="300">
-                <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
-                    <i class="fas fa-certificate text-3xl text-primary-600 group-hover:text-white transition-colors"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">گواهینامه معتبر</h3>
-                <p class="text-gray-500 dark:text-gray-400">دریافت گواهینامه پایان دوره با اعتبار بین‌المللی</p>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all group" data-aos="fade-up" data-aos-delay="400">
-                <div class="w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
-                    <i class="fas fa-headset text-3xl text-primary-600 group-hover:text-white transition-colors"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">پشتیبانی ۲۴/۷</h3>
-                <p class="text-gray-500 dark:text-gray-400">تیم پشتیبانی آماده پاسخگویی به سوالات شما</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Featured Courses -->
-<section class="py-20">
-    <div class="container mx-auto px-4">
-        <div class="flex justify-between items-end mb-12 flex-wrap gap-4" data-aos="fade-up">
-            <div>
-                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">دوره‌های منتخب</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
-                    محبوب‌ترین دوره‌های مالیبا
+<!-- بقیه کدهای صفحه اصلی -->
+@if ( whyChooseUs?.ShowSection == true && whyChooseUs.Items.Any())
+{
+    <section class="py-16 bg-gray-50 dark:bg-gray-900">
+        <div class="container mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">
+                    @(whyChooseUs.SectionTitle ?? "چرا باید ما را انتخاب کنید؟")
                 </h2>
-                <p class="text-gray-500 dark:text-gray-400 mt-2 max-w-2xl">
-                    دوره‌هایی که بیشترین استقبال را داشته‌اند و با بالاترین امتیاز از طرف دانشجویان
+                @if (!string.IsNullOrEmpty(whyChooseUs.SectionSubtitle))
+                {
+                    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                        @whyChooseUs.SectionSubtitle
+                    </p>
+                }
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var item in whyChooseUs.Items.OrderBy(i => i.Order))
+                {
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+                         style="@(!string.IsNullOrEmpty(item.BackgroundColor) ? $"background-color: {item.BackgroundColor};" : "")">
+                        <div class="flex items-start gap-4">
+                            <div class="w-14 h-14 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center flex-shrink-0"
+                                 style="@(!string.IsNullOrEmpty(item.IconColor) ? $"color: {item.IconColor};" : "")">
+                                <i class="@(item.Icon ?? "fas fa-star") text-2xl text-primary-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+                                    @item.Title
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                                    @item.Description
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+<!-- Featured Courses -->
+@if ((settings?.ShowFeaturedCourses ?? true) && Model.FeaturedCourses.Any())
+{
+    <section class="py-20">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-end mb-12 flex-wrap gap-4" data-aos="fade-up">
+                <div>
+                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">دوره‌های منتخب</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
+                        محبوب‌ترین دوره‌های مالیبا
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-2 max-w-2xl">
+                        دوره‌هایی که بیشترین استقبال را داشته‌اند و با بالاترین امتیاز از طرف دانشجویان
+                    </p>
+                </div>
+                <a href="/course" class="text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group">
+                    مشاهده همه دوره‌ها
+                    <i class="fas fa-arrow-left group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @foreach (var course in Model.FeaturedCourses)
+                {
+                    <partial name="_CourseCard" model="course" />
+                }
+            </div>
+
+            @if (!Model.FeaturedCourses.Any())
+            {
+                <div class="text-center py-12">
+                    <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500">هیچ دوره‌ای یافت نشد</p>
+                </div>
+            }
+        </div>
+    </section>
+}
+<!-- Categories Section with Icons -->
+@if ((settings?.ShowCategories ?? true) && Model.Categories.Any())
+{
+    <section class="py-20 bg-gray-50 dark:bg-gray-900/50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">دسته‌بندی</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
+                    موضوعات آموزشی
+                </h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-3 max-w-2xl mx-auto">
+                    در تخصصی‌ترین زمینه‌های مالی و حسابداری با ما همراه شوید
                 </p>
             </div>
-            <a href="/course" class="text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group">
-                مشاهده همه دوره‌ها
-                <i class="fas fa-arrow-left group-hover:translate-x-1 transition-transform"></i>
-            </a>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            @foreach (var course in Model.FeaturedCourses)
-            {
-                <partial name="_CourseCard" model="course" />
-            }
-        </div>
-
-        @if (!Model.FeaturedCourses.Any())
-        {
-            <div class="text-center py-12">
-                <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
-                <p class="text-gray-500">هیچ دوره‌ای یافت نشد</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                @foreach (var category in Model.Categories)
+                {
+                    <a href="/category/@category.Slug"
+                    class="group bg-white dark:bg-gray-800 rounded-2xl p-6 text-center hover:shadow-2xl transition-all transform hover:-translate-y-2"
+                    data-aos="fade-up" data-aos-delay="@(LoopIndex * 100)">
+                        <div class="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fas @GetCategoryIcon(category.Slug) text-3xl text-primary-600"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">@category.Name</h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">@category.Children.Count دوره</p>
+                    </a>
+                }
             </div>
-        }
-    </div>
-</section>
-
-<!-- Categories Section with Icons -->
-<section class="py-20 bg-gray-50 dark:bg-gray-900/50">
-    <div class="container mx-auto px-4">
-        <div class="text-center mb-12" data-aos="fade-up">
-            <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">دسته‌بندی</span>
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
-                موضوعات آموزشی
-            </h2>
-            <p class="text-gray-500 dark:text-gray-400 mt-3 max-w-2xl mx-auto">
-                در تخصصی‌ترین زمینه‌های مالی و حسابداری با ما همراه شوید
-            </p>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @foreach (var category in Model.Categories)
-            {
-                <a href="/category/@category.Slug"
-                       class="group bg-white dark:bg-gray-800 rounded-2xl p-6 text-center hover:shadow-2xl transition-all transform hover:-translate-y-2"
-                       data-aos="fade-up" data-aos-delay="@(LoopIndex * 100)">
-                    <div class="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                        <i class="fas @GetCategoryIcon(category.Slug) text-3xl text-primary-600"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">@category.Name</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">@category.Children.Count دوره</p>
-                </a>
-            }
-        </div>
-    </div>
-</section>
-
+    </section>
+}
 @functions {
     private int LoopIndex = 0;
     private string GetCategoryIcon(string slug)
@@ -220,79 +220,83 @@
 }
 
 <!-- Latest Courses with Slider -->
-<section class="py-20">
-    <div class="container mx-auto px-4">
-        <div class="flex justify-between items-end mb-12 flex-wrap gap-4" data-aos="fade-up">
-            <div>
-                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">جدیدترین‌ها</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
-                    آخرین دوره‌های اضافه شده
-                </h2>
-                <p class="text-gray-500 dark:text-gray-400 mt-2">به‌روزترین دوره‌های آموزشی مالیبا</p>
+@if ((settings?.ShowLatestCourses ?? true) && Model.LatestCourses.Any())
+{
+    <section class="py-20">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-end mb-12 flex-wrap gap-4" data-aos="fade-up">
+                <div>
+                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">جدیدترین‌ها</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mt-2">
+                        آخرین دوره‌های اضافه شده
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mt-2">به‌روزترین دوره‌های آموزشی مالیبا</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var course in Model.LatestCourses)
+                {
+                    <partial name="_CourseCard" model="course" />
+                }
             </div>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach (var course in Model.LatestCourses)
-            {
-                <partial name="_CourseCard" model="course" />
-            }
-        </div>
-    </div>
-</section>
-
+    </section>
+}
 <!-- Testimonials Section -->
-<section class="py-20 bg-primary-700">
-    <div class="container mx-auto px-4">
-        <div class="text-center mb-12" data-aos="fade-up">
-            <span class="text-white/80 text-sm uppercase tracking-wider">نظرات دانشجویان</span>
-            <h2 class="text-3xl md:text-4xl font-bold text-white mt-2">
-                چه می‌گویند؟
-            </h2>
-            <p class="text-white/70 mt-3 max-w-2xl mx-auto">
-                تجربه یادگیری دانشجویان ما در موسسه مالیبا
-            </p>
-        </div>
+@if (settings?.ShowTestimonials ?? true)
+{
+    <section class="py-20 bg-primary-700">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <span class="text-white/80 text-sm uppercase tracking-wider">نظرات دانشجویان</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mt-2">
+                    چه می‌گویند؟
+                </h2>
+                <p class="text-white/70 mt-3 max-w-2xl mx-auto">
+                    تجربه یادگیری دانشجویان ما در موسسه مالیبا
+                </p>
+            </div>
 
-        <div class="swiper testimonial-slider overflow-hidden" x-data="initTestimonialSlider()" x-init="initSlider()">
-            <div class="swiper-wrapper">
-                <!-- Sample Testimonial 1 -->
-                <div class="swiper-slide">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-                                <span class="text-white font-bold text-xl">م</span>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-800 dark:text-white">محمد رضایی</h4>
-                                <div class="flex text-yellow-400 text-sm mt-1">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
+            <div class="swiper testimonial-slider overflow-hidden" x-data="initTestimonialSlider()" x-init="initSlider()">
+                <div class="swiper-wrapper">
+                    <!-- Sample Testimonial 1 -->
+                    <div class="swiper-slide">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold text-xl">م</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800 dark:text-white">محمد رضایی</h4>
+                                    <div class="flex text-yellow-400 text-sm mt-1">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
                                 </div>
                             </div>
+                            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                                "دوره حسابداری مالی بسیار عالی بود. اساتید حرفه‌ای و پشتیبانی فوق‌العاده. واقعاً راضی هستم."
+                            </p>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-                            "دوره حسابداری مالی بسیار عالی بود. اساتید حرفه‌ای و پشتیبانی فوق‌العاده. واقعاً راضی هستم."
-                        </p>
                     </div>
+                    <!-- Add more testimonials... -->
                 </div>
-                <!-- Add more testimonials... -->
-            </div>
-            <div class="flex justify-center gap-2 mt-8">
-                <div class="swiper-button-prev !relative !left-auto !right-auto !mt-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
-                    <i class="fas fa-chevron-right text-white"></i>
-                </div>
-                <div class="swiper-button-next !relative !left-auto !right-auto !mt-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
-                    <i class="fas fa-chevron-left text-white"></i>
+                <div class="flex justify-center gap-2 mt-8">
+                    <div class="swiper-button-prev !relative !left-auto !right-auto !mt-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
+                        <i class="fas fa-chevron-right text-white"></i>
+                    </div>
+                    <div class="swiper-button-next !relative !left-auto !right-auto !mt-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
+                        <i class="fas fa-chevron-left text-white"></i>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-
+    </section>
+}
 <!-- CTA Banner -->
 <section class="py-20">
     <div class="container mx-auto px-4">

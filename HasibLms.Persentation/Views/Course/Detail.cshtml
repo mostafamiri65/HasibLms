@@ -1,115 +1,183 @@
 ﻿@model HasibLms.Shared.DTOs.CourseDetailDto
 @using HasibLms.Domain.Interfaces
+@using HasibLms.Shared.Extensions
 @inject ISiteService SiteService
 @{
+    ViewBag.Title = Model.Title;
     var settings = await SiteService.GetSettingsAsync();
     var isLoggedIn = User.Identity?.IsAuthenticated == true;
+    var currency = settings?.CurrencySymbol ?? "تومان";
+
+    // بررسی وجود ویدیو: ابتدا IntroVideoUrl، اگر خالی بود FullVideoUrl (اگر وجود دارد)
+    var videoUrl = !string.IsNullOrEmpty(Model.IntroVideoUrl) ? Model.IntroVideoUrl : null;
+    var hasVideo = !string.IsNullOrEmpty(videoUrl);
+
+    // تشخیص YouTube از بقیه
+    var isYouTube = hasVideo && (videoUrl!.Contains("youtube.com") || videoUrl.Contains("youtu.be"));
 }
 
-<!-- Course Header -->
-<section class="relative bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12">
-    <div class="container mx-auto px-4">
+<!-- ==================== Course Header ==================== -->
+<section class="relative bg-gradient-to-br from-gray-900 via-gray-900 to-primary-900 text-white py-12 overflow-hidden">
+    <!-- Decorative background -->
+    <div class="absolute inset-0 opacity-20">
+        <div class="absolute -top-20 -right-20 w-96 h-96 bg-primary-500 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-20 -left-20 w-96 h-96 bg-primary-700 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
         <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Course Image -->
-            <div class="lg:w-1/3">
-                <div class="rounded-2xl overflow-hidden shadow-2xl">
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                    {
-                        <img src="@Model.ImageUrl" alt="@Model.Title" class="w-full h-auto" />
-                    }
-                    else
-                    {
-                        <div class="w-full aspect-video bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
-                            <i class="fas fa-graduation-cap text-6xl text-white/50"></i>
-                        </div>
-                    }
-                </div>
+            <!-- ==================== Video / Image ==================== -->
+            <div class="lg:w-1/2">
+                @if (hasVideo && isYouTube)
+                {
+                    <div class="rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video">
+                        <iframe src="@videoUrl"
+                                class="w-full h-full"
+                                title="@Model.Title"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                }
+                else if (hasVideo)
+                {
+                    <div class="rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video">
+                        <video src="@videoUrl" controls class="w-full h-full" poster="@Model.ImageUrl">
+                            مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+                        </video>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="rounded-2xl overflow-hidden shadow-2xl">
+                        <img src="@Model.ImageUrl" alt="@Model.Title" class="w-full h-auto max-h-[420px] object-cover" />
+                    </div>
+                }
+                else
+                {
+                    <div class="rounded-2xl overflow-hidden shadow-2xl aspect-video bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-7xl text-white/40"></i>
+                    </div>
+                }
             </div>
 
-            <!-- Course Info -->
-            <div class="lg:w-2/3">
+            <!-- ==================== Course Info ==================== -->
+            <div class="lg:w-1/2 flex flex-col justify-center">
                 <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="px-3 py-1 bg-primary-600 rounded-full text-sm">@Model.CategoryName</span>
-                    <span class="px-3 py-1 bg-white/10 rounded-full text-sm">@Model.CourseType</span>
+                    <span class="px-3 py-1 bg-primary-600 rounded-full text-sm font-medium">
+                        <i class="fas fa-tag ml-1 text-xs"></i>@Model.CategoryName
+                    </span>
+                    <span class="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-sm">
+                        @Model.CourseType
+                    </span>
                     @if (Model.IsUserEnrolled)
                     {
-                        <span class="px-3 py-1 bg-green-600 rounded-full text-sm">
-                            <i class="fas fa-check ml-1"></i> ثبت نام کرده‌اید
+                        <span class="px-3 py-1 bg-green-600 rounded-full text-sm font-medium">
+                            <i class="fas fa-check-circle ml-1"></i>ثبت‌نام کرده‌اید
                         </span>
                     }
                 </div>
 
-                <h1 class="text-3xl lg:text-4xl font-bold mb-4">@Model.Title</h1>
-                <p class="text-gray-300 text-lg mb-6">@Model.ShortDescription</p>
+                <h1 class="text-3xl lg:text-4xl font-bold mb-4 leading-tight">@Model.Title</h1>
 
-                <div class="flex flex-wrap gap-6 mb-6 text-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-chalkboard-teacher text-primary-400"></i>
-                        <span>مدرس: @Model.InstructorName</span>
+                @if (!string.IsNullOrEmpty(Model.ShortDescription))
+                {
+                    <p class="text-gray-300 text-lg mb-6 leading-relaxed">@Model.ShortDescription</p>
+                }
+
+                <!-- Meta Info -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-sm">
+                    <div class="flex items-center gap-2 bg-white/5 backdrop-blur-sm rounded-lg p-3">
+                        <i class="fas fa-chalkboard-teacher text-primary-400 text-lg"></i>
+                        <div>
+                            <p class="text-gray-400 text-xs">مدرس</p>
+                            <p class="font-medium">@Model.InstructorName</p>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-clock text-primary-400"></i>
-                        <span>@Model.DurationHours ساعت</span>
+                    <div class="flex items-center gap-2 bg-white/5 backdrop-blur-sm rounded-lg p-3">
+                        <i class="fas fa-clock text-primary-400 text-lg"></i>
+                        <div>
+                            <p class="text-gray-400 text-xs">مدت</p>
+                            <p class="font-medium">@Model.DurationHours ساعت</p>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-calendar text-primary-400"></i>
-                        <span>شروع: @Model.StartDate.ToString("yyyy/MM/dd")</span>
+                    <div class="flex items-center gap-2 bg-white/5 backdrop-blur-sm rounded-lg p-3">
+                        <i class="fas fa-calendar-alt text-primary-400 text-lg"></i>
+                        <div>
+                            <p class="text-gray-400 text-xs">شروع</p>
+                            <p class="font-medium">@Model.StartDate.ToPersianDate()</p>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-users text-primary-400"></i>
-                        <span>@Model.EnrolledCount دانشجو</span>
+                    <div class="flex items-center gap-2 bg-white/5 backdrop-blur-sm rounded-lg p-3">
+                        <i class="fas fa-users text-primary-400 text-lg"></i>
+                        <div>
+                            <p class="text-gray-400 text-xs">دانشجو</p>
+                            <p class="font-medium">@Model.EnrolledCount نفر</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="flex text-yellow-400">
-                        @for (int i = 1; i <= 5; i++)
-                        {
-                            if (i <= (int)Math.Floor(Model.AverageRating))
+                <!-- Rating & Price -->
+                <div class="flex flex-wrap items-center gap-6 mb-6">
+                    <!-- Rating -->
+                    <div class="flex items-center gap-2">
+                        <div class="flex text-yellow-400">
+                            @for (int i = 1; i <= 5; i++)
                             {
-                                <i class="fas fa-star"></i>
+                                if (i <= (int)Math.Floor(Model.AverageRating))
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else if (i - Model.AverageRating < 0.6)
+                                {
+                                    <i class="fas fa-star-half-alt"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
                             }
-                            else if (i - Model.AverageRating < (double)0.6m)
-                            {
-                                <i class="fas fa-star-half-alt"></i>
-                            }
-                            else
-                            {
-                                <i class="far fa-star"></i>
-                            }
-                        }
-                        <span class="text-white mr-2">(@Model.ReviewCount نظر)</span>
+                        </div>
+                        <span class="text-white/80 text-sm">(@Model.ReviewCount نظر)</span>
                     </div>
-                    <div class="text-3xl font-bold">
+
+                    <!-- Price -->
+                    <div class="flex items-baseline gap-2">
                         @if (Model.DiscountPrice.HasValue && Model.DiscountPrice < Model.Price)
                         {
-                            <span class="line-through text-gray-400 text-xl ml-2">@Model.Price.ToString("N0")</span>
-                            <span>@Model.DiscountPrice.Value.ToString("N0")</span>
+                            <span class="line-through text-gray-400 text-lg">@Model.Price.ToString("N0")</span>
+                            <span class="text-3xl font-bold text-primary-400">@Model.DiscountPrice.Value.ToString("N0")</span>
+                            <span class="text-sm text-gray-300">@currency</span>
+                            <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full mr-2">
+                                @(Math.Round((Model.Price - Model.DiscountPrice.Value) / Model.Price * 100))% تخفیف
+                            </span>
                         }
                         else
                         {
-                            <span>@Model.Price.ToString("N0")</span>
+                            <span class="text-3xl font-bold">@Model.Price.ToString("N0")</span>
+                            <span class="text-sm text-gray-300">@currency</span>
                         }
-                        <span class="text-sm font-normal text-gray-300"> @settings?.CurrencySymbol</span>
                     </div>
                 </div>
 
+                <!-- Action Buttons -->
                 @if (!Model.IsUserEnrolled && Model.IsPublished)
                 {
-                    <button onclick="enrollInCourse('@Model.Id')"
-                            class="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-700 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                        <i class="fas fa-shopping-cart ml-2"></i> ثبت نام در دوره
+                    <button onclick="showEnrollModal()"
+                            class="w-full sm:w-auto px-8 py-4 bg-primary-600 hover:bg-primary-700 rounded-xl font-semibold transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        <i class="fas fa-shopping-cart"></i>
+                        ثبت‌نام در دوره
                     </button>
                 }
                 else if (Model.IsUserEnrolled)
                 {
-                    <div class="flex gap-3">
-                        <a href="/course/learn/@Model.Slug" class="px-8 py-3 bg-green-600 hover:bg-green-700 rounded-xl font-semibold transition-all">
-                            <i class="fas fa-play ml-2"></i> شروع یادگیری
+                    <div class="flex flex-wrap gap-3">
+                        <a href="/course/learn/@Model.Slug"
+                           class="px-8 py-4 bg-green-600 hover:bg-green-700 rounded-xl font-semibold transition-all flex items-center gap-2">
+                            <i class="fas fa-play-circle"></i>
+                            شروع یادگیری
                         </a>
-                        <button class="px-4 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all">
-                            <i class="far fa-bookmark"></i>
-                        </button>
                     </div>
                 }
             </div>
@@ -117,69 +185,92 @@
     </div>
 </section>
 
-<!-- Course Content Tabs - بدون Alpine.js -->
+<!-- ==================== Course Content Tabs ==================== -->
 <section class="py-12">
     <div class="container mx-auto px-4">
         <!-- Tab Buttons -->
-        <div class="flex border-b border-gray-200 dark:border-gray-700 mb-8">
+        <div class="flex border-b border-gray-200 dark:border-gray-700 mb-8 overflow-x-auto">
             <button onclick="showTab('description')" id="tabDescriptionBtn"
-                    class="tab-btn px-4 py-2 border-b-2 font-medium transition-colors border-primary-600 text-primary-600">
-                توضیحات دوره
+                    class="tab-btn px-6 py-3 border-b-2 font-medium transition-colors border-primary-600 text-primary-600 whitespace-nowrap">
+                <i class="fas fa-align-right ml-2"></i>توضیحات دوره
             </button>
-            <button onclick="showTab('syllabus')" id="tabSyllabusBtn"
-                    class="tab-btn px-4 py-2 border-b-2 font-medium transition-colors border-transparent text-gray-500 hover:text-gray-700">
-                سرفصل‌ها (@Model.Syllabuses.Count)
-            </button>
+            @* <button onclick="showTab('syllabus')" id="tabSyllabusBtn"
+                    class="tab-btn px-6 py-3 border-b-2 font-medium transition-colors border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                <i class="fas fa-list ml-2"></i>سرفصل‌ها (@Model.Syllabuses.Count)
+            </button> *@
             <button onclick="showTab('reviews')" id="tabReviewsBtn"
-                    class="tab-btn px-4 py-2 border-b-2 font-medium transition-colors border-transparent text-gray-500 hover:text-gray-700">
-                نظرات (@Model.ReviewCount)
+                    class="tab-btn px-6 py-3 border-b-2 font-medium transition-colors border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                <i class="fas fa-comments ml-2"></i>نظرات (@Model.ReviewCount)
             </button>
         </div>
 
-        <!-- Description Tab -->
+        <!-- ==================== Description Tab ==================== -->
         <div id="tabDescription" class="tab-content">
-            <div class="prose prose-lg dark:prose-invert max-w-none">
-                @Html.Raw(Model.Description)
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 lg:p-8">
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="prose prose-lg dark:prose-invert max-w-none article-content">
+                        @Html.Raw(Model.Description)
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-info-circle text-4xl mb-3"></i>
+                        <p>هنوز توضیحاتی برای این دوره ثبت نشده است</p>
+                    </div>
+                }
             </div>
         </div>
 
-        <!-- Syllabus Tab -->
+        <!-- ==================== Syllabus Tab ==================== -->
         <div id="tabSyllabus" class="tab-content hidden">
             <div class="space-y-4">
                 @if (Model.Syllabuses != null && Model.Syllabuses.Any())
                 {
                     @foreach (var syllabus in Model.Syllabuses.OrderBy(s => s.Order))
                     {
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                            <button onclick="toggleSyllabus(this)" 
-                                    class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 flex justify-between items-center">
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
+                            <button onclick="toggleSyllabus(this)"
+                                    class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 flex justify-between items-center transition-colors">
                                 <div class="flex items-center gap-3">
-                                    <i class="fas fa-chevron-down transition-transform"></i>
-                                    <span class="font-semibold">بخش @syllabus.Order: @syllabus.Title</span>
+                                    <i class="fas fa-chevron-down transition-transform text-primary-600"></i>
+                                    <span class="font-semibold text-gray-800 dark:text-white">بخش @syllabus.Order: @syllabus.Title</span>
                                 </div>
-                                <span class="text-sm text-gray-500">@syllabus.Lessons.Count جلسه</span>
+                                <span class="text-sm text-gray-500 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
+                                    @syllabus.Lessons.Count جلسه
+                                </span>
                             </button>
-                            <div class="syllabus-content divide-y divide-gray-100 dark:divide-gray-800">
+                            <div class="syllabus-content divide-y divide-gray-100 dark:divide-gray-700">
                                 @if (syllabus.Lessons != null && syllabus.Lessons.Any())
                                 {
                                     @foreach (var lesson in syllabus.Lessons.OrderBy(l => l.Order))
                                     {
-                                        <div class="px-6 py-3 flex items-center justify-between">
+                                        <div class="px-6 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                             <div class="flex items-center gap-3">
-                                                <i class="fas @(lesson.IsPreview ? "fa-play-circle text-primary-600" : "fa-lock text-gray-400")"></i>
-                                                <span>@lesson.Title</span>
                                                 @if (lesson.IsPreview)
                                                 {
-                                                    <span class="text-xs text-primary-600">پیش‌نمایش رایگان</span>
+                                                    <i class="fas fa-play-circle text-primary-600 text-lg"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-lock text-gray-400"></i>
+                                                }
+                                                <span class="text-gray-800 dark:text-gray-200">@lesson.Title</span>
+                                                @if (lesson.IsPreview)
+                                                {
+                                                    <span class="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">پیش‌نمایش رایگان</span>
                                                 }
                                             </div>
-                                            <span class="text-sm text-gray-500">@(lesson.DurationMinutes) دقیقه</span>
+                                            <span class="text-sm text-gray-500">
+                                                <i class="far fa-clock ml-1"></i>@lesson.DurationMinutes دقیقه
+                                            </span>
                                         </div>
                                     }
                                 }
                                 else
                                 {
-                                    <div class="px-6 py-4 text-center text-gray-500">
+                                    <div class="px-6 py-6 text-center text-gray-500">
                                         <i class="fas fa-info-circle ml-2"></i>هیچ جلسه‌ای برای این سرفصل تعریف نشده است
                                     </div>
                                 }
@@ -189,7 +280,7 @@
                 }
                 else
                 {
-                    <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                    <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl">
                         <i class="fas fa-folder-open text-5xl text-gray-300 mb-3"></i>
                         <p class="text-gray-500">هنوز سرفصلی برای این دوره ثبت نشده است</p>
                     </div>
@@ -197,32 +288,45 @@
             </div>
         </div>
 
-        <!-- Reviews Tab -->
+        <!-- ==================== Reviews Tab ==================== -->
         <div id="tabReviews" class="tab-content hidden">
-            <div class="space-y-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
                 @if (Model.Reviews != null && Model.Reviews.Any())
                 {
-                    @foreach (var review in Model.Reviews)
-                    {
-                        <div class="border-b border-gray-100 dark:border-gray-800 pb-6">
-                            <div class="flex items-center gap-3 mb-2">
-                                <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
-                                    <span class="text-white text-sm font-medium">@(review.StudentName?.Substring(0, 1) ?? "کاربر")</span>
-                                </div>
-                                <div>
-                                    <div class="font-semibold">@review.StudentName</div>
-                                    <div class="flex text-yellow-400 text-sm">
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            <i class="fas @(i <= review.Rating ? "fa-star" : "fa-star-o")"></i>
-                                        }
+                    <div class="space-y-6">
+                        @foreach (var review in Model.Reviews)
+                        {
+                            <div class="border-b border-gray-100 dark:border-gray-700 pb-6 last:border-0 last:pb-0">
+                                <div class="flex items-start gap-3 mb-3">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <span class="text-white font-bold">
+                                            @(string.IsNullOrEmpty(review.StudentName) ? "ک" : review.StudentName.Substring(0, 1))
+                                        </span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between flex-wrap gap-2">
+                                            <div>
+                                                <div class="font-semibold text-gray-800 dark:text-white">@review.StudentName</div>
+                                                <div class="flex text-yellow-400 text-sm mt-1">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas @(i <= review.Rating ? "fa-star" : "far fa-star")"></i>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="text-xs text-gray-400">
+                                                <i class="far fa-calendar ml-1"></i>@review.CreatedAt.ToPersianDate()
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="text-xs text-gray-400 mr-auto">@review.CreatedAt.ToString("yyyy/MM/dd")</div>
+                                @if (!string.IsNullOrEmpty(review.Comment))
+                                {
+                                    <p class="text-gray-600 dark:text-gray-300 leading-relaxed mr-15 pr-15" style="margin-right:60px;">@review.Comment</p>
+                                }
                             </div>
-                            <p class="text-gray-600 dark:text-gray-300">@review.Comment</p>
-                        </div>
-                    }
+                        }
+                    </div>
                 }
                 else
                 {
@@ -231,7 +335,7 @@
                         <p class="text-gray-500">هنوز نظری برای این دوره ثبت نشده است</p>
                         @if (isLoggedIn && !Model.IsUserEnrolled)
                         {
-                            <p class="text-sm text-gray-400 mt-2">برای ثبت نظر باید در دوره ثبت نام کنید</p>
+                            <p class="text-sm text-gray-400 mt-2">برای ثبت نظر باید در دوره ثبت‌نام کنید</p>
                         }
                     </div>
                 }
@@ -240,12 +344,16 @@
     </div>
 </section>
 
-<!-- Related Courses -->
+<!-- ==================== Related Courses ==================== -->
 @if (ViewBag.RelatedCourses != null && ((List<CourseCardDto>)ViewBag.RelatedCourses).Any())
 {
     <section class="py-12 bg-gray-50 dark:bg-gray-900/50">
         <div class="container mx-auto px-4">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">دوره‌های مرتبط</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
+                    <i class="fas fa-layer-group text-primary-600 ml-2"></i>دوره‌های مرتبط
+                </h2>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach (var course in (ViewBag.RelatedCourses as List<CourseCardDto>)!)
                 {
@@ -256,149 +364,225 @@
     </section>
 }
 
-<script>
-    // تابع تغییر تب
-    function showTab(tabName) {
-        // مخفی کردن همه تب‌ها
-        document.getElementById('tabDescription').classList.add('hidden');
-        document.getElementById('tabSyllabus').classList.add('hidden');
-        document.getElementById('tabReviews').classList.add('hidden');
-        
-        // نمایش تب انتخاب شده
-        document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
-        
-        // تغییر استایل دکمه‌ها
-        const buttons = document.querySelectorAll('.tab-btn');
-        buttons.forEach(btn => {
-            btn.classList.remove('border-primary-600', 'text-primary-600');
-            btn.classList.add('border-transparent', 'text-gray-500');
-        });
-        
-        // فعال کردن دکمه انتخاب شده
-        const activeBtn = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Btn');
-        activeBtn.classList.remove('border-transparent', 'text-gray-500');
-        activeBtn.classList.add('border-primary-600', 'text-primary-600');
-    }
-    
-    // تابع باز و بسته کردن سرفصل‌ها
-    function toggleSyllabus(button) {
-        const content = button.nextElementSibling;
-        const icon = button.querySelector('i');
-        
-        if (content.classList.contains('hidden')) {
-            content.classList.remove('hidden');
-            icon.classList.remove('fa-chevron-down');
-            icon.classList.add('fa-chevron-up');
-        } else {
-            content.classList.add('hidden');
-            icon.classList.remove('fa-chevron-up');
-            icon.classList.add('fa-chevron-down');
-        }
-    }
-    
-    // بستن همه سرفصل‌ها در ابتدا (به جز اولین)
-    document.addEventListener('DOMContentLoaded', function() {
-        const syllabusContents = document.querySelectorAll('.syllabus-content');
-        syllabusContents.forEach((content, index) => {
-            if (index === 0) {
-                // اولین سرفصل باز باشد
-                content.classList.remove('hidden');
-                const firstButton = content.previousElementSibling;
-                if (firstButton) {
-                    const icon = firstButton.querySelector('i');
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-up');
+<!-- ==================== Enroll Modal ==================== -->
+<div id="enrollModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+     onclick="if(event.target === this) closeEnrollModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-primary-600 to-primary-800 p-6 text-white relative">
+            <button onclick="closeEnrollModal()" class="absolute top-4 left-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-phone-alt text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-1">ثبت‌نام در دوره</h3>
+                <p class="text-white/80 text-sm">برای ثبت‌نام با ما تماس بگیرید</p>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6">
+            <!-- Course Info -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-5">
+                <div class="flex items-center gap-3">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.Title" class="w-16 h-16 rounded-lg object-cover">
+                    }
+                    <div class="flex-1">
+                        <p class="font-semibold text-gray-800 dark:text-white line-clamp-1">@Model.Title</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">مدرس: @Model.InstructorName</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <span class="text-sm text-gray-500">قیمت دوره:</span>
+                    <span class="font-bold text-primary-600">
+                        @if (Model.DiscountPrice.HasValue && Model.DiscountPrice < Model.Price)
+                        {
+                            <span class="line-through text-gray-400 text-xs ml-1">@Model.Price.ToString("N0")</span>
+                            <span>@Model.DiscountPrice.Value.ToString("N0") @currency</span>
+                        }
+                        else
+                        {
+                            <span>@Model.Price.ToString("N0") @currency</span>
+                        }
+                    </span>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="space-y-3 mb-5">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
+                    <i class="fas fa-info-circle text-primary-600 ml-1"></i>
+                    برای تکمیل ثبت‌نام، با یکی از شماره‌های زیر تماس بگیرید
+                </p>
+
+                @if (!string.IsNullOrEmpty(settings?.Phone))
+                {
+                    <a href="tel:@settings.Phone"
+                       class="flex items-center gap-3 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors group">
+                        <div class="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-phone text-white text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">تلفن ثابت</p>
+                            <p class="font-bold text-gray-800 dark:text-white text-lg" dir="ltr">@settings.Phone</p>
+                        </div>
+                        <i class="fas fa-chevron-left text-primary-600"></i>
+                    </a>
                 }
+
+                @if (!string.IsNullOrEmpty(settings?.Mobile))
+                {
+                    <a href="tel:@settings.Mobile"
+                       class="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors group">
+                        <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-mobile-alt text-white text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">موبایل</p>
+                            <p class="font-bold text-gray-800 dark:text-white text-lg" dir="ltr">@settings.Mobile</p>
+                        </div>
+                        <i class="fas fa-chevron-left text-green-600"></i>
+                    </a>
+                }
+
+                @if (!string.IsNullOrEmpty(settings?.WhatsApp))
+                {
+                    <a href="@settings.WhatsApp" target="_blank"
+                       class="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors group">
+                        <div class="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fab fa-whatsapp text-white text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">واتس‌اپ</p>
+                            <p class="font-bold text-gray-800 dark:text-white">تماس از طریق واتس‌اپ</p>
+                        </div>
+                        <i class="fas fa-external-link-alt text-emerald-600 text-sm"></i>
+                    </a>
+                }
+
+                @if (string.IsNullOrEmpty(settings?.Phone) && string.IsNullOrEmpty(settings?.Mobile))
+                {
+                    <div class="text-center py-6 text-gray-500">
+                        <i class="fas fa-exclamation-circle text-3xl mb-2"></i>
+                        <p>شماره تماس در دسترس نیست</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Note -->
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-5">
+                <p class="text-xs text-yellow-800 dark:text-yellow-200 leading-relaxed">
+                    <i class="fas fa-info-circle ml-1"></i>
+                    پس از تماس و هماهنگی، لینک دسترسی به دوره برای شما ارسال خواهد شد.
+                </p>
+            </div>
+
+            <!-- Close Button -->
+            <button onclick="closeEnrollModal()"
+                    class="w-full py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium">
+                بستن
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ==================== Tab Management ====================
+        function showTab(tabName) {
+            // مخفی کردن همه تب‌ها
+            document.getElementById('tabDescription').classList.add('hidden');
+            document.getElementById('tabSyllabus').classList.add('hidden');
+            document.getElementById('tabReviews').classList.add('hidden');
+
+            // نمایش تب انتخاب شده
+            const capitalizedName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+            document.getElementById('tab' + capitalizedName).classList.remove('hidden');
+
+            // تغییر استایل دکمه‌ها
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-primary-600', 'text-primary-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+
+            // فعال کردن دکمه انتخاب شده
+            const activeBtn = document.getElementById('tab' + capitalizedName + 'Btn');
+            activeBtn.classList.remove('border-transparent', 'text-gray-500');
+            activeBtn.classList.add('border-primary-600', 'text-primary-600');
+        }
+
+        // ==================== Syllabus Toggle ====================
+        function toggleSyllabus(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('i');
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
             } else {
                 content.classList.add('hidden');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
             }
-        });
-    });
-    
-    // تابع ثبت نام در دوره
-    function enrollInCourse(courseId) {
-        @if (!isLoggedIn)
-        {
-            <text>
-                Swal.fire({
-                    title: 'برای ثبت نام وارد شوید',
-                    text: 'لطفاً ابتدا وارد حساب کاربری خود شوید',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'ورود',
-                    cancelButtonText: 'بعداً'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/auth/login?returnUrl=' + encodeURIComponent(window.location.pathname);
-                    }
-                });
-            </text>
         }
-        else
-        {
-            <text>
-                Swal.fire({
-                    title: 'ثبت نام در دوره',
-                    html: 'آیا از ثبت نام در این دوره اطمینان دارید؟',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'بله، ثبت نام',
-                    cancelButtonText: 'انصراف'
-                }).then(async (result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire({
-                            title: 'در حال ثبت نام...',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
 
-                        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-                        
-                        const response = await fetch('/course/enroll', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'RequestVerificationToken': token
-                            },
-                            body: JSON.stringify({ courseId: courseId })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'موفق!',
-                                text: data.message,
-                                icon: 'success',
-                                confirmButtonText: 'باشه'
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'خطا!',
-                                text: data.message,
-                                icon: 'error',
-                                confirmButtonText: 'باشه'
-                            });
+        // بستن همه سرفصل‌ها به جز اولین
+        document.addEventListener('DOMContentLoaded', function () {
+            const syllabusContents = document.querySelectorAll('.syllabus-content');
+            syllabusContents.forEach((content, index) => {
+                if (index === 0) {
+                    content.classList.remove('hidden');
+                    const firstButton = content.previousElementSibling;
+                    if (firstButton) {
+                        const icon = firstButton.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('fa-chevron-down');
+                            icon.classList.add('fa-chevron-up');
                         }
                     }
-                });
-            </text>
-        }
-    }
-</script>
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+        });
 
-<style>
-    .tab-btn {
-        transition: all 0.2s ease;
-    }
-    .tab-btn:hover {
-        color: #2563eb;
-    }
-    .syllabus-content {
-        transition: all 0.3s ease;
-    }
-</style>
+        // ==================== Enroll Modal ====================
+        function showEnrollModal() {
+            const modal = document.getElementById('enrollModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEnrollModal() {
+            const modal = document.getElementById('enrollModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        // بستن با Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeEnrollModal();
+        });
+    </script>
+
+    <style>
+        .tab-btn {
+            transition: all 0.2s ease;
+        }
+
+            .tab-btn:hover {
+                color: #2563eb;
+            }
+
+        .syllabus-content {
+            transition: all 0.3s ease;
+        }
+    </style>
+}

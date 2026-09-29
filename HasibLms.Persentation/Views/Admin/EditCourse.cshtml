@@ -1,0 +1,530 @@
+﻿@model HasibLms.Shared.DTOs.Admin.UpdateCourseByAdminDto
+
+@{
+    ViewBag.Title = "ویرایش دوره";
+    Layout = "_AdminLayout";
+
+    var currency = ViewBag.Currency as string ?? "تومان";
+    var instructors = ViewBag.Instructors as List<HasibLms.Shared.DTOs.Admin.InstructorSelectDto> ?? new();
+    var categories = ViewBag.Categories as List<HasibLms.Shared.DTOs.CategoryDto> ?? new();
+}
+
+<div class="max-w-5xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">ویرایش دوره</h1>
+            <p class="text-gray-500 dark:text-gray-400">اطلاعات دوره را ویرایش کنید</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="/admin/courses" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                <i class="fas fa-arrow-right ml-2"></i>بازگشت
+            </a>
+            <a href="/course/@Model.Slug" target="_blank" class="px-4 py-2 border rounded-lg hover:bg-gray-50 text-primary-600">
+                <i class="fas fa-external-link-alt ml-2"></i>مشاهده در سایت
+            </a>
+        </div>
+    </div>
+
+    <form method="post" action="/admin/editcourse" enctype="multipart/form-data" id="courseForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Slug" />
+
+        <div class="space-y-6">
+            <!-- ==================== اطلاعات اصلی ==================== -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-info-circle text-primary-600 ml-2"></i>اطلاعات اصلی
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">عنوان دوره <span class="text-red-500">*</span></label>
+                        <input asp-for="Title" class="w-full px-4 py-2 border rounded-lg" placeholder="مثال: دوره جامع حسابداری مالی">
+                        <span asp-validation-for="Title" class="text-red-500 text-xs"></span>
+                        <p class="text-xs text-gray-400 mt-1">Slug: <span class="font-mono">@Model.Slug</span></p>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">توضیحات کوتاه</label>
+                        <textarea asp-for="ShortDescription" rows="2" class="w-full px-4 py-2 border rounded-lg" placeholder="خلاصه‌ای کوتاه از دوره"></textarea>
+                        <span asp-validation-for="ShortDescription" class="text-red-500 text-xs"></span>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">توضیحات کامل <span class="text-red-500">*</span></label>
+                        <textarea asp-for="Description" rows="8" class="w-full px-4 py-2 border rounded-lg" placeholder="توضیحات کامل دوره..."></textarea>
+                        <span asp-validation-for="Description" class="text-red-500 text-xs"></span>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">دسته‌بندی <span class="text-red-500">*</span></label>
+                        <select asp-for="CategoryId" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="">انتخاب کنید...</option>
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-red-500 text-xs"></span>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">نوع دوره</label>
+                        <select asp-for="CourseType" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="1">آنلاین</option>
+                            <option value="2">حضوری</option>
+                            <option value="3">آفلاین</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">مدرس دوره <span class="text-red-500">*</span></label>
+                        <select asp-for="InstructorId" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="">انتخاب کنید...</option>
+                            @foreach (var inst in instructors)
+                            {
+                                <option value="@inst.Id">
+                                    @inst.FullName - @inst.Email@(inst.IsInstructor ? " (مدرس)" : "")
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="InstructorId" class="text-red-500 text-xs"></span>
+                        <p class="text-xs text-gray-400 mt-1">
+                            <i class="fas fa-info-circle ml-1"></i>
+                            اگر کاربر انتخابی مدرس نباشد، به‌طور خودکار نقش مدرس به او داده می‌شود.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== قیمت‌گذاری ==================== -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-tag text-primary-600 ml-2"></i>قیمت‌گذاری
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">قیمت (@currency)</label>
+                        <input asp-for="Price" type="number" id="priceInput"
+                               class="w-full px-4 py-2 border rounded-lg" placeholder="0">
+                        <p class="text-xs text-gray-500 mt-1 font-medium" id="priceFormatted">0 @currency</p>
+                        <span asp-validation-for="Price" class="text-red-500 text-xs"></span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">قیمت با تخفیف (@currency)</label>
+                        <input asp-for="DiscountPrice" type="number" id="discountInput"
+                               class="w-full px-4 py-2 border rounded-lg" placeholder="اختیاری">
+                        <p class="text-xs text-gray-500 mt-1 font-medium" id="discountFormatted">-</p>
+                        <span asp-validation-for="DiscountPrice" class="text-red-500 text-xs"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== زمان‌بندی ==================== -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-calendar text-primary-600 ml-2"></i>زمان‌بندی
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- تاریخ شروع -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">تاریخ شروع</label>
+
+                        <input type="text"
+                               id="startDatePersian"
+                               class="persian-date-input w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                               placeholder="1403/05/15"
+                               autocomplete="off"
+                               readonly>
+
+                        <input asp-for="StartDate" type="hidden" id="startDateGregorian" />
+
+                        <span asp-validation-for="StartDate" class="text-red-500 text-xs"></span>
+                    </div>
+
+                    <!-- تاریخ پایان -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">تاریخ پایان (اختیاری)</label>
+
+                        <input type="text"
+                               id="endDatePersian"
+                               class="persian-date-input w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                               placeholder="1403/08/20"
+                               autocomplete="off"
+                               readonly>
+
+                        <input asp-for="EndDate" type="hidden" id="endDateGregorian" />
+                    </div>
+
+                    <!-- مدت -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مدت (ساعت)</label>
+                        <input asp-for="DurationHours" type="number" class="w-full px-4 py-2 border rounded-lg">
+                        <span asp-validation-for="DurationHours" class="text-red-500 text-xs"></span>
+                    </div>
+
+                    <!-- ظرفیت -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ظرفیت</label>
+                        <input asp-for="Capacity" type="number" class="w-full px-4 py-2 border rounded-lg">
+                        <span asp-validation-for="Capacity" class="text-red-500 text-xs"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== تصویر و ویدیو ==================== -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-video text-primary-600 ml-2"></i>تصویر و ویدیو
+                </h2>
+
+                <div class="space-y-6">
+                    <!-- آپلود تصویر -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">تصویر دوره</label>
+
+                        <input type="file" id="courseImageFile" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden">
+
+                        <!-- Drop Zone -->
+                        <div id="courseImageDropZone"
+                             class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-gray-700 transition-all @(!string.IsNullOrEmpty(Model.ImageUrl) ? "hidden" : "")">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">برای آپلود کلیک کنید یا تصویر را بکشید</p>
+                            <p class="text-xs text-gray-400 mt-1">فرمت: JPG, PNG, WEBP, GIF — حداکثر ۲ مگابایت</p>
+                        </div>
+
+                        <!-- لودینگ -->
+                        <div id="uploadProgress" class="hidden text-center py-4">
+                            <div class="inline-block w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                            <p class="text-sm text-gray-500 mt-2">در حال آپلود...</p>
+                        </div>
+
+                        <!-- پیش‌نمایش (اگر تصویر قبلی وجود دارد، نشان بده) -->
+                        <div id="courseImagePreviewBox" class="@(string.IsNullOrEmpty(Model.ImageUrl) ? "hidden" : "") mt-3">
+                            <div class="relative inline-block">
+                                <img id="courseImagePreview" src="@Model.ImageUrl" alt="پیش‌نمایش" class="max-h-48 rounded-lg border shadow-sm">
+                                <button type="button" onclick="removeCourseImage()"
+                                        class="absolute -top-2 -left-2 w-7 h-7 bg-red-500 text-white rounded-full hover:bg-red-600 flex items-center justify-center">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- فیلد مخفی آدرس تصویر -->
+                        <input asp-for="ImageUrl" type="hidden" id="ImageUrl" />
+
+                        <!-- آدرس دستی -->
+                        <details class="mt-3">
+                            <summary class="text-xs text-gray-500 cursor-pointer hover:text-primary-600">یا آدرس URL دستی وارد کنید</summary>
+                            <input type="text" id="manualImageUrl" value="@Model.ImageUrl"
+                                   class="w-full mt-2 px-3 py-2 border rounded-lg text-sm"
+                                   placeholder="/uploads/courses/image.jpg">
+                        </details>
+                    </div>
+
+                    <!-- ویدیو معرفی -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ویدیو معرفی دوره</label>
+                        <input asp-for="IntroVideoUrl" class="w-full px-4 py-2 border rounded-lg"
+                               placeholder="https://www.youtube.com/embed/...">
+                        <p class="text-xs text-gray-500 mt-1">لینک ویدیو از YouTube یا آپارات (embed URL)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== تنظیمات انتشار ==================== -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-cog text-primary-600 ml-2"></i>تنظیمات انتشار
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">وضعیت انتشار</label>
+                        <select asp-for="IsPublished" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="false">پیش‌نویس</option>
+                            <option value="true">منتشر شده</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">دوره منتخب</label>
+                        <select asp-for="IsFeatured" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="false">خیر</option>
+                            <option value="true">بله</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== SEO ==================== -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-search text-primary-600 ml-2"></i>تنظیمات SEO
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">عنوان Meta</label>
+                        <input asp-for="MetaTitle" class="w-full px-4 py-2 border rounded-lg" maxlength="70">
+                        <p class="text-xs text-gray-400 mt-1">حداکثر ۷۰ کاراکتر</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">توضیحات Meta</label>
+                        <textarea asp-for="MetaDescription" rows="2" class="w-full px-4 py-2 border rounded-lg" maxlength="160"></textarea>
+                        <p class="text-xs text-gray-400 mt-1">حداکثر ۱۶۰ کاراکتر</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== دکمه‌ها ==================== -->
+            <div class="flex justify-end gap-3">
+                <a href="/admin/courses" class="px-6 py-2 border rounded-lg hover:bg-gray-50">انصراف</a>
+                <button type="submit" class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                    <i class="fas fa-save ml-2"></i>ذخیره تغییرات
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        // ============================================
+        // Persian Date Picker
+        // ============================================
+        $(document).ready(function () {
+            // تنظیمات مشترک
+            const datePickerOptions = {
+                format: 'YYYY/MM/DD',
+                initialValue: false,
+                autoClose: true,
+                persianDigit: false,  // اعداد لاتین (برای هماهنگی با form)
+                observer: true,
+                altField: null,       // ما به صورت دستی مدیریت می‌کنیم
+                altFormat: 'YYYY/MM/DD'
+            };
+
+            // ============ تاریخ شروع ============
+            const $startPersian = $('#startDatePersian');
+            const $startGregorian = $('#startDateGregorian');
+
+            $startPersian.pDatepicker(datePickerOptions);
+
+            $startPersian.on('change', function () {
+                const persianValue = $(this).val();
+                if (!persianValue) {
+                    $startGregorian.val('');
+                    return;
+                }
+
+                try {
+                    // تبدیل شمس به میلادی
+                    const gregorian = new persianDate(persianValue.split('/').map(Number)).toDate();
+                    // فرمت YYYY-MM-DD برای input type=hidden که سرور انتظار دارد
+                    const formatted = formatDateForServer(gregorian);
+                    $startGregorian.val(formatted);
+                } catch (e) {
+                    console.error('Error parsing start date', e);
+                }
+            });
+
+            // ============ تاریخ پایان ============
+            const $endPersian = $('#endDatePersian');
+            const $endGregorian = $('#endDateGregorian');
+
+            $endPersian.pDatepicker(datePickerOptions);
+
+            $endPersian.on('change', function () {
+                const persianValue = $(this).val();
+                if (!persianValue) {
+                    $endGregorian.val('');
+                    return;
+                }
+
+                try {
+                    const gregorian = new persianDate(persianValue.split('/').map(Number)).toDate();
+                    const formatted = formatDateForServer(gregorian);
+                    $endGregorian.val(formatted);
+                } catch (e) {
+                    console.error('Error parsing end date', e);
+                }
+            });
+
+            // ============================================
+            // مقداردهی اولیه (فقط برای Edit)
+            // ============================================
+            // اگر فیلد میلادی مقدار دارد، آن را به شمس تبدیل کن و در فیلد نمایشی بگذار
+            initializePersianDate($startGregorian, $startPersian);
+            initializePersianDate($endGregorian, $endPersian);
+
+            function initializePersianDate($gregorianInput, $persianInput) {
+                const gregorianValue = $gregorianInput.val();
+                if (gregorianValue) {
+                    try {
+                        const gregorianDate = new Date(gregorianValue);
+                        if (!isNaN(gregorianDate.getTime())) {
+                            const persianDateObj = new persianDate(gregorianDate);
+                            const persianFormatted = persianDateObj.format('YYYY/MM/DD');
+                            $persianInput.val(persianFormatted);
+                        }
+                    } catch (e) {
+                        console.error('Error converting gregorian to persian', e);
+                    }
+                }
+            }
+
+            // ============================================
+            // فرمت تاریخ میلادی برای ارسال به سرور
+            // ============================================
+            function formatDateForServer(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+        });
+        // ============================================
+        // فرمت ۳ رقم ۳ رقم مبلغ
+        // ============================================
+        function formatMoney(value) {
+            if (value === null || value === undefined || value === '') return '0';
+            const num = String(value).replace(/[^\d]/g, '');
+            if (!num) return '0';
+            return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        const currency = '@Html.Raw(currency)';
+        const priceInput = document.getElementById('priceInput');
+        const discountInput = document.getElementById('discountInput');
+        const priceFormatted = document.getElementById('priceFormatted');
+        const discountFormatted = document.getElementById('discountFormatted');
+
+        function updatePrice() {
+            priceFormatted.textContent = formatMoney(priceInput.value) + ' ' + currency;
+        }
+        function updateDiscount() {
+            if (!discountInput.value) {
+                discountFormatted.textContent = '-';
+            } else {
+                discountFormatted.textContent = formatMoney(discountInput.value) + ' ' + currency;
+            }
+        }
+
+        priceInput.addEventListener('input', updatePrice);
+        discountInput.addEventListener('input', updateDiscount);
+        updatePrice();
+        updateDiscount();
+
+        // ============================================
+        // آپلود تصویر دوره
+        // ============================================
+        const imageFileInput = document.getElementById('courseImageFile');
+        const imageUrlInput = document.getElementById('ImageUrl');
+        const imagePreview = document.getElementById('courseImagePreview');
+        const imagePreviewBox = document.getElementById('courseImagePreviewBox');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const dropZone = document.getElementById('courseImageDropZone');
+        const manualImageUrl = document.getElementById('manualImageUrl');
+
+        dropZone.addEventListener('click', () => imageFileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-primary-500', 'bg-primary-50');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-primary-500', 'bg-primary-50');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-primary-500', 'bg-primary-50');
+            if (e.dataTransfer.files.length) {
+                handleImageFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        imageFileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                handleImageFile(this.files[0]);
+            }
+        });
+
+        function handleImageFile(file) {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            const maxSize = 2 * 1024 * 1024;
+
+            if (!allowedTypes.includes(file.type)) {
+                Swal.fire('خطا!', 'فرمت فایل مجاز نیست. فقط JPG, PNG, WEBP, GIF', 'error');
+                return;
+            }
+            if (file.size > maxSize) {
+                Swal.fire('خطا!', 'حجم تصویر نباید بیشتر از ۲ مگابایت باشد', 'error');
+                return;
+            }
+            uploadImage(file);
+        }
+
+        async function uploadImage(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            uploadProgress.classList.remove('hidden');
+            dropZone.classList.add('opacity-50', 'pointer-events-none');
+
+            try {
+                const response = await fetch('/api/upload/course-image', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    imageUrlInput.value = data.url;
+                    imagePreview.src = data.url;
+                    imagePreviewBox.classList.remove('hidden');
+                    dropZone.classList.add('hidden');
+                    Swal.fire({ title: 'موفق!', text: 'تصویر آپلود شد', icon: 'success', timer: 1500, showConfirmButton: false });
+                } else {
+                    Swal.fire('خطا!', data.message || 'خطا در آپلود تصویر', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire('خطا!', 'خطا در ارتباط با سرور', 'error');
+            } finally {
+                uploadProgress.classList.add('hidden');
+                dropZone.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        function removeCourseImage() {
+            imageUrlInput.value = '';
+            imageFileInput.value = '';
+            imagePreview.src = '';
+            imagePreviewBox.classList.add('hidden');
+            dropZone.classList.remove('hidden');
+        }
+
+        manualImageUrl.addEventListener('input', function () {
+            const url = this.value.trim();
+            if (url) {
+                imageUrlInput.value = url;
+                imagePreview.src = url;
+                imagePreviewBox.classList.remove('hidden');
+                dropZone.classList.add('hidden');
+            } else {
+                imageUrlInput.value = '';
+                imagePreviewBox.classList.add('hidden');
+                dropZone.classList.remove('hidden');
+            }
+        });
+    </script>
+}

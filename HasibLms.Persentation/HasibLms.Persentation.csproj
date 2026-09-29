@@ -23,4 +23,8 @@
 		<ProjectReference Include="..\HasibLms.Persistence\HasibLms.Persistence.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="wwwroot\TextEditor\" />
+	</ItemGroup>
+
 </Project>

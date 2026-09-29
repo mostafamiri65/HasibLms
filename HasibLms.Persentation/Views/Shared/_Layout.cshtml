@@ -1,12 +1,19 @@
-﻿﻿@using HasibLms.Domain.Interfaces
+﻿﻿﻿@using HasibLms.Domain.Interfaces
 @using Microsoft.AspNetCore.Identity
 @inject ISiteService SiteService
+@inject IMenuService MenuService
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
 @{
     var settings = await SiteService.GetSettingsAsync();
     var isAuthenticated = SignInManager.IsSignedIn(User);
     var user = await UserManager.GetUserAsync(User);
+    var headerMenu = await MenuService.GetHeaderMenuAsync(CancellationToken.None);
+    var footerMenu = await MenuService.GetFooterMenuAsync(CancellationToken.None);
+
+    var roles = isAuthenticated ? await UserManager.GetRolesAsync(user!) : new List<string>();
+    var isAdmin = roles.Contains("Admin");
+    var isInstructor = roles.Contains("Instructor");
 }
 
 <!DOCTYPE html>
@@ -145,19 +152,16 @@
     {
     if(darkMode) document.documentElement.classList.add('dark');
 
-    // AOS باید بعد از بارگذاری کامل صفحه اجرا شود
     setTimeout(() => {
     if (typeof AOS !== 'undefined') {
     AOS.init({ duration: 800, once: true });
     }
     }, 100);
 
-    // Scroll listener for back to top button
     window.addEventListener('scroll', () => {
     showBackToTop = window.scrollY > 300;
     });
 
-    // Update cart count from localStorage
     cartCount = JSON.parse(localStorage.getItem('cart') || '[]').length;
     }"
     :class="{ 'dark': darkMode }">
@@ -170,7 +174,241 @@
         </div>
     </div>
 
-    <partial name="_Header" model="settings" />
+    <!-- ===== HEADER ===== -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
+        <nav class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-2 shrink-0">
+                    @if (!string.IsNullOrEmpty(settings?.LogoUrl))
+                    {
+                        <img src="@settings.LogoUrl" alt="@settings.InstituteName" class="h-10 w-auto" />
+                    }
+                    else
+                    {
+                        <span class="text-2xl font-bold text-primary-600">@(settings?.InstituteShortName ?? "مالیبا")</span>
+                    }
+                </a>
+
+                <!-- Desktop Menu -->
+                <ul class="hidden lg:flex items-center gap-1">
+                    @if (headerMenu != null && headerMenu.Any())
+                    {
+                        foreach (var item in headerMenu)
+                        {
+                            if (item.Children != null && item.Children.Any())
+                            {
+                                <li class="relative group">
+                                    <button class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400 transition-all flex items-center gap-1">
+                                        @if (!string.IsNullOrEmpty(item.Icon))
+                                        {
+                                            <i class="@item.Icon text-sm"></i>
+                                        }
+                                        @item.Title
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </button>
+                                    <div class="absolute right-0 mt-1 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                        @foreach (var child in item.Children)
+                                        {
+                                            <a href="@(child.Url ?? "#")" target="@(item.Target ?? "_self")" class="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-all">
+                                                @if (!string.IsNullOrEmpty(child.Icon))
+                                                {
+                                                    <i class="@child.Icon ml-2 w-4 text-center"></i>
+                                                }
+                                                @child.Title
+                                            </a>
+                                        }
+                                    </div>
+                                </li>
+                            }
+                            else
+                            {
+                                <li>
+                                    <a href="@(item.Url ?? "#")" target="@(item.Target ?? "_self")" class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400 transition-all flex items-center gap-1">
+                                        @if (!string.IsNullOrEmpty(item.Icon))
+                                        {
+                                            <i class="@item.Icon text-sm"></i>
+                                        }
+                                        @item.Title
+                                    </a>
+                                </li>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <!-- منوهای پیش‌فرض در صورت خالی بودن -->
+                        <li><a href="/" class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 transition-all">خانه</a></li>
+                        <li><a href="/course" class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 transition-all">دوره‌ها</a></li>
+                        <li><a href="/article" class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 transition-all">مقالات</a></li>
+                        <li><a href="/home/about" class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 transition-all">درباره ما</a></li>
+                        <li><a href="/home/contact" class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary-600 transition-all">تماس با ما</a></li>
+                    }
+                </ul>
+
+                <!-- Right Side Actions -->
+                <div class="flex items-center gap-2">
+                    <!-- Dark Mode Toggle -->
+                    <button @@click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode); document.documentElement.classList.toggle('dark')"
+                            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 transition-all">
+                        <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                    </button>
+
+                    <!-- Search -->
+                    <button @@click="searchOpen = !searchOpen" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 transition-all">
+                        <i class="fas fa-search"></i>
+                    </button>
+
+                    <!-- User Menu -->
+                    @if (isAuthenticated && user != null)
+                    {
+                        <div class="relative" x-data="{ open: false }">
+                            <button @@click="open = !open" class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                                @if (!string.IsNullOrEmpty(user.AvatarUrl))
+                                {
+                                    <img src="@user.AvatarUrl" alt="@user.FullName" class="w-8 h-8 rounded-full object-cover" />
+                                }
+                                else
+                                {
+                                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold text-sm">
+                                        @(user.FullName?.FirstOrDefault().ToString() ?? "U")
+                                    </div>
+                                }
+                            </button>
+                            <div x-show="open"
+                                 @@click.away="open = false"
+                                 class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 py-1">
+                                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                                    <p class="font-medium text-gray-800 dark:text-white">@user.FullName</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">@user.Email</p>
+                                </div>
+                                <a href="/auth/profile" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                                    <i class="fas fa-user w-4 text-center"></i>پروفایل
+                                </a>
+                                 @if (isAdmin)
+                {
+                    <a href="/admin" class="px-3 py-2.5 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors text-primary-600 dark:text-primary-400">
+                        <i class="fas fa-chart-line ml-2"></i> پنل مدیریت
+                    </a>
+                }
+                @if (isInstructor && !isAdmin)
+                {
+                    <a href="/instructor/dashboard" class="px-3 py-2.5 rounded-xl hover:bg-secondary-50 dark:hover:bg-secondary-900/20 transition-colors text-secondary-500">
+                        <i class="fas fa-chalkboard-teacher ml-2"></i> پنل مدرس
+                    </a>
+                }
+                                @* @if (User.IsInRole("Instructor") || User.IsInRole("Admin"))
+                                {
+                                    <a href="/instructor/dashboard" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                                        <i class="fas fa-chalkboard-teacher w-4 text-center"></i>داشبورد مدرس
+                                    </a>
+                                }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a href="/admin" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                                        <i class="fas fa-cog w-4 text-center"></i>پنل مدیریت
+                                    </a>
+                                } *@
+                                <form method="post" action="/auth/logout" class="block">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-right transition-all">
+                                        <i class="fas fa-sign-out-alt w-4 text-center"></i>خروج
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="/auth/login" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-all text-sm font-medium">
+                            ورود / ثبت نام
+                        </a>
+                    }
+
+                    <!-- Mobile Menu Toggle -->
+                    <button @@click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 transition-all">
+                        <i class="fas" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div x-show="searchOpen"
+                 x-transition
+                 class="mt-3">
+                <form action="/course/search" method="get" class="relative">
+                    <input type="text"
+                           name="q"
+                           placeholder="جستجوی دوره، مقاله، مدرس..."
+                           class="w-full px-4 py-3 pr-12 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:border-primary-500 dark:focus:border-primary-500 outline-none transition-all text-gray-800 dark:text-white" />
+                    <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-600 transition-all">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div x-show="mobileMenuOpen"
+                 x-transition
+                 class="lg:hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <ul class="space-y-1">
+                    @if (headerMenu != null && headerMenu.Any())
+                    {
+                        foreach (var item in headerMenu)
+                        {
+                            if (item.Children != null && item.Children.Any())
+                            {
+                                <li x-data="{ open: false }">
+                                    <button @@click="open = !open" class="flex items-center justify-between w-full px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                                        <span class="flex items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(item.Icon))
+                                            {
+                                                <i class="@item.Icon"></i>
+                                            }
+                                            @item.Title
+                                        </span>
+                                        <i class="fas fa-chevron-down text-xs transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                                    </button>
+                                    <div x-show="open" class="mr-4 space-y-1">
+                                        @foreach (var child in item.Children)
+                                        {
+                                            <a href="@(child.Url ?? "#")" target="@(item.Target ?? "_self")" class="block px-4 py-2.5 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-all">
+                                                @if (!string.IsNullOrEmpty(child.Icon))
+                                                {
+                                                    <i class="@child.Icon ml-2"></i>
+                                                }
+                                                @child.Title
+                                            </a>
+                                        }
+                                    </div>
+                                </li>
+                            }
+                            else
+                            {
+                                <li>
+                                    <a href="@(item.Url ?? "#")" target="@(item.Target ?? "_self")" class="flex items-center gap-2 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                                        @if (!string.IsNullOrEmpty(item.Icon))
+                                        {
+                                            <i class="@item.Icon"></i>
+                                        }
+                                        @item.Title
+                                    </a>
+                                </li>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <li><a href="/" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">خانه</a></li>
+                        <li><a href="/course" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">دوره‌ها</a></li>
+                        <li><a href="/article" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">مقالات</a></li>
+                        <li><a href="/home/about" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">درباره ما</a></li>
+                        <li><a href="/home/contact" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">تماس با ما</a></li>
+                    }
+                </ul>
+            </div>
+        </nav>
+    </header>
 
     <!-- Toast Container -->
     <div id="toastContainer" class="fixed bottom-4 left-4 z-50 space-y-2"></div>
@@ -179,7 +417,112 @@
         @RenderBody()
     </main>
 
-    <partial name="_Footer" model="settings" />
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-gray-900 text-gray-300">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- About -->
+                <div>
+                    <h3 class="text-white font-bold text-lg mb-4">@(settings?.InstituteName ?? "مالیبا")</h3>
+                    <p class="text-sm leading-relaxed text-gray-400">
+                        @(settings?.AboutText ?? "موسسه آموزشی تخصصی حسابداری و مالی با بیش از ۱۰ سال تجربه")
+                    </p>
+                    <div class="mt-4 flex gap-3">
+                        @if (!string.IsNullOrEmpty(settings?.Instagram))
+                        {
+                            <a href="@settings.Instagram" target="_blank" class="text-gray-400 hover:text-white transition-all"><i class="fab fa-instagram text-xl"></i></a>
+                        }
+                        @if (!string.IsNullOrEmpty(settings?.Telegram))
+                        {
+                            <a href="@settings.Telegram" target="_blank" class="text-gray-400 hover:text-white transition-all"><i class="fab fa-telegram text-xl"></i></a>
+                        }
+                        @if (!string.IsNullOrEmpty(settings?.LinkedIn))
+                        {
+                            <a href="@settings.LinkedIn" target="_blank" class="text-gray-400 hover:text-white transition-all"><i class="fab fa-linkedin text-xl"></i></a>
+                        }
+                        @if (!string.IsNullOrEmpty(settings?.YouTube))
+                        {
+                            <a href="@settings.YouTube" target="_blank" class="text-gray-400 hover:text-white transition-all"><i class="fab fa-youtube text-xl"></i></a>
+                        }
+                        @if (!string.IsNullOrEmpty(settings?.WhatsApp))
+                        {
+                            <a href="@settings.WhatsApp" target="_blank" class="text-gray-400 hover:text-white transition-all"><i class="fab fa-whatsapp text-xl"></i></a>
+                        }
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">لینک‌های سریع</h4>
+                    <ul class="space-y-2">
+                        @if (footerMenu != null && footerMenu.Any())
+                        {
+                            foreach (var item in footerMenu)
+                            {
+                                <li>
+                                    <a href="@(item.Url ?? "#")" target="@(item.Target ?? "_self")" class="text-gray-400 hover:text-white transition-all text-sm">
+                                        @item.Title
+                                    </a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li><a href="/home/about" class="text-gray-400 hover:text-white transition-all text-sm">درباره ما</a></li>
+                            <li><a href="/home/contact" class="text-gray-400 hover:text-white transition-all text-sm">تماس با ما</a></li>
+                            <li><a href="/home/privacy" class="text-gray-400 hover:text-white transition-all text-sm">حریم خصوصی</a></li>
+                            <li><a href="/home/terms" class="text-gray-400 hover:text-white transition-all text-sm">قوانین و مقررات</a></li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">اطلاعات تماس</h4>
+                    <ul class="space-y-3 text-sm">
+                        @if (!string.IsNullOrEmpty(settings?.Address))
+                        {
+                            <li class="flex items-start gap-3">
+                                <i class="fas fa-map-marker-alt text-primary-500 mt-1"></i>
+                                <span class="text-gray-400">@settings.Address</span>
+                            </li>
+                        }
+                        @if (!string.IsNullOrEmpty(settings?.Phone))
+                        {
+                            <li class="flex items-center gap-3">
+                                <i class="fas fa-phone text-primary-500"></i>
+                                <span class="text-gray-400">@settings.Phone</span>
+                            </li>
+                        }
+                        @if (!string.IsNullOrEmpty(settings?.Email))
+                        {
+                            <li class="flex items-center gap-3">
+                                <i class="fas fa-envelope text-primary-500"></i>
+                                <span class="text-gray-400">@settings.Email</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div>
+                    <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">خبرنامه</h4>
+                    <p class="text-sm text-gray-400 mb-3">با عضویت در خبرنامه، از جدیدترین دوره‌ها مطلع شوید</p>
+                    <form id="newsletterForm" class="flex flex-col gap-2">
+                        <input type="email" id="newsletterEmail" placeholder="ایمیل خود را وارد کنید" class="px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:border-primary-500 outline-none text-white text-sm" required />
+                        <button type="submit" class="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-all text-sm font-medium">
+                            عضویت
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="mt-8 pt-6 border-t border-gray-800 text-center text-sm text-gray-500">
+                @(settings?.CopyrightText ?? "تمامی حقوق برای موسسه آموزشی مالیبا محفوظ است.")
+            </div>
+        </div>
+    </footer>
 
     <!-- Back to Top Button -->
     <button x-show="showBackToTop"
@@ -210,9 +553,7 @@
     </div>
 
     <!-- ====== اسکریپت‌ها ====== -->
-    <!-- 1. Tailwind و کانفیگ آن -->
     <script>
-        // تابع کانفیگ Tailwind را قبل از بارگذاری تعریف می‌کنیم
         window.initTailwindConfig = function() {
             if (typeof tailwind !== 'undefined') {
                 tailwind.config = {
@@ -284,26 +625,17 @@
                 };
                 console.log('Tailwind config loaded successfully');
             } else {
-                // اگر Tailwind هنوز بارگذاری نشده، بعد از 100ms دوباره تلاش کن
                 setTimeout(window.initTailwindConfig, 100);
             }
         };
     </script>
 
-    <!-- بارگذاری Tailwind -->
     <script src="https://cdn.tailwindcss.com" onload="window.initTailwindConfig()"></script>
-
-    <!-- 2. بقیه کتابخانه‌ها -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-    <!-- 3. Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- 4. Custom JS -->
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- Global Toast Function -->
     <script>
         window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -336,6 +668,30 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         };
+
+        // Newsletter Form
+        document.getElementById('newsletterForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('newsletterEmail').value;
+            fetch('/home/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) {
+                    document.getElementById('newsletterEmail').value = '';
+                }
+            })
+            .catch(() => {
+                showToast('خطا در عضویت خبرنامه', 'error');
+            });
+        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
@@ -351,7 +707,6 @@
         transition: transform 0.3s ease;
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -379,7 +734,6 @@
         background: #4b5563;
     }
 
-    /* Selection Color */
     ::selection {
         background-color: var(--primary-500);
         color: white;

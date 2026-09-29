@@ -356,7 +356,8 @@ public class ArticleService : IArticleService
 			AuthorName = article.Author?.FullName ?? "نویسنده",
 			AuthorAvatar = article.Author?.AvatarUrl,
 			Tags = article.ArticleTags?.Select(at => at.Tag.Name).ToList() ?? new List<string>(),
-			ViewCount = 0
+			ViewCount = 0,
+			IsFeatured = article.FeatureStatus
 		};
 	}
 }

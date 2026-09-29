@@ -1,3 +1,4 @@
+using HasibLms.Application.Services;
 using HasibLms.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,16 +11,20 @@ public class HomeController : Controller
 	private readonly ISiteService _siteService;
 	private readonly ILogger<HomeController> _logger;
 
+	private readonly IWhyChooseUsService _whyChooseUsService;
+
 	public HomeController(
 		ICourseService courseService,
 		IArticleService articleService,
 		ISiteService siteService,
-		ILogger<HomeController> logger)
+		ILogger<HomeController> logger,
+		IWhyChooseUsService whyChooseUsService)
 	{
 		_courseService = courseService;
 		_articleService = articleService;
 		_siteService = siteService;
 		_logger = logger;
+		_whyChooseUsService = whyChooseUsService;
 	}
 
 	[ResponseCache(Duration = 900, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "page" })]
@@ -30,6 +35,7 @@ public class HomeController : Controller
 			var settings = await _siteService.GetSettingsAsync(cancellationToken);
 			ViewBag.Title = settings?.InstituteName ?? "صفحه اصلی";
 			ViewBag.MetaDescription = settings?.MetaDescription ?? "بزرگترین پلتفرم آموزش تخصصی حسابداری، مالیات و سرمایه‌گذاری در ایران";
+			ViewBag.WhyChooseUs = await _whyChooseUsService.GetSettingsAsync(cancellationToken);
 
 			var model = await _courseService.GetHomePageDataAsync(cancellationToken);
 			return View(model);

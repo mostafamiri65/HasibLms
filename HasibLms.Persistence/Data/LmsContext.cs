@@ -27,6 +27,15 @@ public class LmsContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	public DbSet<ArticleTag> ArticleTags { get; set; }
 	public DbSet<SiteSetting> SiteSettings { get; set; }
 	public DbSet<InstructorRequest> InstructorRequests { get; set; }
+	public DbSet<Page> Pages { get; set; }
+	public DbSet<PageBlock> PageBlocks { get; set; }
+	public DbSet<Site> Sites { get; set; }
+	public DbSet<SiteSettings> AllSiteSettings { get; set; }
+	//public DbSet<Menu> Menus { get; set; }
+	//public DbSet<MenuItem> MenuItems { get; set; }
+	public DbSet<MenuItemEntity> MenuItems { get; set; }
+	public DbSet<WhyChooseUsItem> WhyChooseUsItems { get; set; }
+
 	protected override void OnModelCreating(ModelBuilder builder)
 	{
 		base.OnModelCreating(builder);
@@ -43,6 +52,34 @@ public class LmsContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 				  .WithMany(c => c.Children)
 				  .HasForeignKey(c => c.ParentId)
 				  .OnDelete(DeleteBehavior.Restrict);
+		});
+
+		// ============================= MenuItemEntity =================================
+		builder.Entity<MenuItemEntity>(entity =>
+		{
+			entity.HasKey(m => m.Id);
+			entity.Property(m => m.Title).HasMaxLength(100).IsRequired();
+			entity.Property(m => m.Url).HasMaxLength(500);
+			entity.Property(m => m.Location).HasMaxLength(50).IsRequired();
+
+			entity.HasOne(m => m.Parent)
+				  .WithMany(m => m.Children)
+				  .HasForeignKey(m => m.ParentId)
+				  .OnDelete(DeleteBehavior.Restrict);
+
+			entity.HasIndex(m => m.Order);
+			entity.HasIndex(m => m.Location);
+		});
+
+		// ============================= WhyChooseUsItem =================================
+		builder.Entity<WhyChooseUsItem>(entity =>
+		{
+			entity.HasKey(w => w.Id);
+			entity.Property(w => w.Title).HasMaxLength(200).IsRequired();
+			entity.Property(w => w.Description).HasMaxLength(500);
+			entity.Property(w => w.Icon).HasMaxLength(50);
+			entity.HasIndex(w => w.Order);
+			entity.HasIndex(w => w.IsActive);
 		});
 
 		// ═══════════════ Course ═══════════════
@@ -215,5 +252,80 @@ public class LmsContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 		builder.Entity<Article>().HasQueryFilter(e => !e.IsDeleted);
 		builder.Entity<InstructorRequest>().HasQueryFilter(e => !e.IsDeleted);
 		builder.Entity<Tag>().HasQueryFilter(e => !e.IsDeleted);
+		builder.Entity<Page>(entity =>
+		{
+			entity.HasKey(p => p.Id);
+			entity.Property(p => p.Title).HasMaxLength(200).IsRequired();
+			entity.Property(p => p.Slug).HasMaxLength(300).IsRequired();
+			entity.HasIndex(p => p.Slug).IsUnique();
+			entity.Property(p => p.Template).HasMaxLength(100);
+
+			entity.HasOne(p => p.Parent)
+				.WithMany(p => p.Children)
+				.HasForeignKey(p => p.ParentId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			entity.HasIndex(p => p.IsHomePage);
+			entity.HasIndex(p => p.IsPublished);
+		});
+
+		//=========================== PageBlock =========================================//
+		builder.Entity<PageBlock>(entity =>
+		{
+			entity.HasKey(b => b.Id);
+			entity.Property(b => b.Type).HasMaxLength(50).IsRequired();
+			entity.Property(b => b.Title).HasMaxLength(200);
+			entity.Property(b => b.Settings).HasColumnType("nvarchar(max)");
+
+			entity.HasOne(b => b.Page)
+				.WithMany(p => p.Blocks)
+				.HasForeignKey(b => b.PageId)
+				.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		//============================== Site =================================================//
+		builder.Entity<Site>(entity =>
+		{
+			entity.HasKey(s => s.Id);
+			entity.Property(s => s.Name).HasMaxLength(200).IsRequired();
+			entity.Property(s => s.Domain).HasMaxLength(200).IsRequired();
+			entity.HasIndex(s => s.Domain).IsUnique();
+		});
+
+		//=================================== SiteSettings =========================//
+		builder.Entity<SiteSettings>(entity =>
+		{
+			entity.HasKey(ss => ss.Id);
+			entity.HasOne(ss => ss.Site)
+				.WithOne(s => s.Settings)
+				.HasForeignKey<SiteSettings>(ss => ss.SiteId)
+				.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		//=================================== Menu ==========================================//
+		builder.Entity<Menu>(entity =>
+		{
+			entity.HasKey(m => m.Id);
+			entity.Property(m => m.Name).HasMaxLength(100).IsRequired();
+			entity.Property(m => m.Location).HasMaxLength(50);
+		});
+
+		//================================== MenuItem =====================================//
+		builder.Entity<MenuItem>(entity =>
+		{
+			entity.HasKey(mi => mi.Id);
+			entity.Property(mi => mi.Title).HasMaxLength(100).IsRequired();
+			entity.Property(mi => mi.Url).HasMaxLength(500).IsRequired();
+
+			entity.HasOne(mi => mi.Menu)
+				.WithMany(m => m.Items)
+				.HasForeignKey(mi => mi.MenuId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(mi => mi.Parent)
+				.WithMany(mi => mi.Children)
+				.HasForeignKey(mi => mi.ParentId)
+				.OnDelete(DeleteBehavior.Restrict);
+		});
 	}
 }

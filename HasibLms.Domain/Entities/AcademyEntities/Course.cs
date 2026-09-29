@@ -12,7 +12,8 @@ public class Course : BaseEntity
 	public decimal Price { get; set; }
 	public decimal? DiscountPrice { get; set; } // قیمت تخفیف‌خورده
 	public string? ImageUrl { get; set; }
-	public string? IntroVideoUrl { get; set; } // ویدیو معرفی
+	public string? IntroVideoUrl { get; set; }  // ویدیو معرفی (قبلاً بود)
+	public string? FullVideoUrl { get; set; }   // ✅ جدید: ویدیوی اصلی دوره
 
 	public CourseType CourseType { get; set; }
 	public DateTime StartDate { get; set; } // برای Online/InPerson

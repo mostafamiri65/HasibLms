@@ -106,6 +106,9 @@ namespace HasibLms.Persistence.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FullVideoUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -476,6 +479,9 @@ namespace HasibLms.Persistence.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("FeatureStatus")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -583,6 +589,239 @@ namespace HasibLms.Persistence.Migrations
                     b.ToTable("Tags");
                 });
 
+            modelBuilder.Entity("HasibLms.Domain.Entities.Menu", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Menu");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.MenuItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("MenuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Target")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MenuId");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("MenuItem");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.PageBlock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BackgroundColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomClass")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DataCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DataFilter")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DataSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Settings")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Subtitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TextColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PageId");
+
+                    b.ToTable("PageBlocks");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.Settings.MenuItemEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CssClass")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Target")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Location");
+
+                    b.HasIndex("Order");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("MenuItems");
+                });
+
             modelBuilder.Entity("HasibLms.Domain.Entities.Settings.SiteSetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -590,18 +829,15 @@ namespace HasibLms.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AboutText")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("AllowRegistration")
                         .HasColumnType("bit");
 
                     b.Property<string>("CopyrightText")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("CreatedBy")
@@ -611,43 +847,48 @@ namespace HasibLms.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CurrencySymbol")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("DefaultTaxRate")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FaviconUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Fax")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FooterText")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GoogleMapEmbed")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("HomeArticlesCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HomeFeaturedCoursesCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HomeLatestCoursesCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HomePopularCoursesCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Instagram")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InstituteName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InstituteShortName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InstituteSlug")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -687,31 +928,24 @@ namespace HasibLms.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MetaAuthor")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MetaDescription")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MetaKeywords")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MetaTitle")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Mobile")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PostalCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PrimaryColor")
@@ -723,11 +957,37 @@ namespace HasibLms.Persistence.Migrations
                     b.Property<string>("SecondaryColor")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("ShowCategories")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowFeaturedCourses")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowLatestArticles")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowLatestCourses")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowPopularArticles")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowPopularCourses")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("ShowPrices")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("ShowStats")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowTestimonials")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowWhyChooseUs")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Slogan")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SmtpPassword")
@@ -751,12 +1011,196 @@ namespace HasibLms.Persistence.Migrations
                     b.Property<string>("WhatsApp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("WhyChooseUsSubtitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WhyChooseUsTitle")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("YouTube")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("SiteSettings");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.Settings.WhyChooseUsItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BackgroundColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("IconColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ShowOnHomePage")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Order");
+
+                    b.ToTable("WhyChooseUsItems");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.Site", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Domain")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("FaviconUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FontFamily")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("PrimaryColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecondaryColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Domain")
+                        .IsUnique();
+
+                    b.ToTable("Sites");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.SiteSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CssVariables")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomCss")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EnableComments")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EnableReviews")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FooterScripts")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HeaderScripts")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SeoDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SeoKeywords")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SeoTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SiteId")
+                        .IsUnique();
+
+                    b.ToTable("AllSiteSettings");
                 });
 
             modelBuilder.Entity("HasibLms.Domain.Entities.User", b =>
@@ -974,6 +1418,90 @@ namespace HasibLms.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Page", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CanonicalUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHomePage")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MetaDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetaKeywords")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetaTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("ShowInMenu")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("SiteId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Template")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsHomePage");
+
+                    b.HasIndex("IsPublished");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("SiteId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("Pages");
+                });
+
             modelBuilder.Entity("HasibLms.Domain.Entities.AcademyEntities.Category", b =>
                 {
                     b.HasOne("HasibLms.Domain.Entities.AcademyEntities.Category", "Parent")
@@ -1112,6 +1640,56 @@ namespace HasibLms.Persistence.Migrations
                     b.Navigation("Tag");
                 });
 
+            modelBuilder.Entity("HasibLms.Domain.Entities.MenuItem", b =>
+                {
+                    b.HasOne("HasibLms.Domain.Entities.Menu", "Menu")
+                        .WithMany("Items")
+                        .HasForeignKey("MenuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HasibLms.Domain.Entities.MenuItem", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Menu");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.PageBlock", b =>
+                {
+                    b.HasOne("Page", "Page")
+                        .WithMany("Blocks")
+                        .HasForeignKey("PageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Page");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.Settings.MenuItemEntity", b =>
+                {
+                    b.HasOne("HasibLms.Domain.Entities.Settings.MenuItemEntity", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.SiteSettings", b =>
+                {
+                    b.HasOne("HasibLms.Domain.Entities.Site", "Site")
+                        .WithOne("Settings")
+                        .HasForeignKey("HasibLms.Domain.Entities.SiteSettings", "SiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Site");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -1163,6 +1741,20 @@ namespace HasibLms.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Page", b =>
+                {
+                    b.HasOne("Page", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HasibLms.Domain.Entities.Site", null)
+                        .WithMany("Pages")
+                        .HasForeignKey("SiteId");
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("HasibLms.Domain.Entities.AcademyEntities.Category", b =>
                 {
                     b.Navigation("Children");
@@ -1196,6 +1788,29 @@ namespace HasibLms.Persistence.Migrations
                     b.Navigation("ArticleTags");
                 });
 
+            modelBuilder.Entity("HasibLms.Domain.Entities.Menu", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.MenuItem", b =>
+                {
+                    b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.Settings.MenuItemEntity", b =>
+                {
+                    b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("HasibLms.Domain.Entities.Site", b =>
+                {
+                    b.Navigation("Pages");
+
+                    b.Navigation("Settings")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("HasibLms.Domain.Entities.User", b =>
                 {
                     b.Navigation("Articles");
@@ -1205,6 +1820,13 @@ namespace HasibLms.Persistence.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("TaughtCourses");
+                });
+
+            modelBuilder.Entity("Page", b =>
+                {
+                    b.Navigation("Blocks");
+
+                    b.Navigation("Children");
                 });
 #pragma warning restore 612, 618
         }

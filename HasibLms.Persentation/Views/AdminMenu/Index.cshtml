@@ -1,0 +1,106 @@
+﻿@using HasibLms.Shared.DTOs.Settings
+@model HasibLms.Shared.DTOs.Settings.MenuSettingsDto
+@{
+    ViewBag.Title = "مدیریت منوها";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">مدیریت منوها</h1>
+            <p class="text-gray-500 dark:text-gray-400">مدیریت منوهای هدر و فوتر سایت</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="/admin/menu/create?location=header" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                <i class="fas fa-plus ml-2"></i>افزودن به منوی هدر
+            </a>
+            <a href="/admin/menu/create?location=footer" class="px-4 py-2 bg-secondary-500 text-white rounded-lg hover:bg-secondary-600">
+                <i class="fas fa-plus ml-2"></i>افزودن به منوی فوتر
+            </a>
+        </div>
+    </div>
+
+    <!-- Header Menu -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">منوی هدر</h2>
+        <div class="sortable-container" data-location="header">
+            @await Html.PartialAsync("_MenuItemList", Model.HeaderMenuItems ?? new List<MenuItemDto>())
+        </div>
+    </div>
+
+    <!-- Footer Menu -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 mt-4">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">منوی فوتر</h2>
+        <div class="sortable-container" data-location="footer">
+            @await Html.PartialAsync("_MenuItemList", Model.FooterMenuItems ?? new List<MenuItemDto>())
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.sortable-container').forEach(container => {
+                new Sortable(container, {
+                    animation: 150,
+                    onEnd: function(evt) {
+                        const location = container.dataset.location;
+                        const items = container.querySelectorAll('.menu-item');
+                        const ids = Array.from(items).map(item => item.dataset.id);
+
+                        fetch('/admin/menu/reorder', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify({ location: location, ids: ids })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    showToast(data.message, 'success');
+                                } else {
+                                    showToast(data.message, 'error');
+                                }
+                            })
+                            .catch(() => {
+                                showToast('خطا در تغییر ترتیب', 'error');
+                            });
+                    }
+                });
+            });
+        });
+
+        function deleteMenuItem(id) {
+            Swal.fire({
+                title: 'آیا مطمئن هستید؟',
+                text: 'این منو حذف خواهد شد',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف کن',
+                cancelButtonText: 'لغو'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/menu/delete?id=${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                location.reload();
+                            } else {
+                                showToast(data.message, 'error');
+                            }
+                        });
+                }
+            });
+        }
+    </script>
+}

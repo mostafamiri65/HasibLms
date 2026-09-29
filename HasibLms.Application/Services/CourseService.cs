@@ -13,6 +13,7 @@ public class CourseService : ICourseService
 	private readonly ICourseRepository _courseRepository;
 	private readonly ICategoryRepository _categoryRepository;
 	private readonly IArticleRepository _articleRepository;
+	private readonly ISiteService _siteService;
 	private readonly IGenericRepository<Enrollment> _enrollmentRepository;
 	private readonly IMemoryCache _cache;
 	private readonly ILogger<CourseService> _logger;
@@ -26,7 +27,7 @@ public class CourseService : ICourseService
 		IGenericRepository<Enrollment> enrollmentRepository,
 		IMemoryCache cache,
 		ILogger<CourseService> logger, ILogger<CategoryService> categoryLogger,
-		IGenericRepository<Syllabus> syllabusRepository, IGenericRepository<Lesson> lessonRepository)
+		IGenericRepository<Syllabus> syllabusRepository, IGenericRepository<Lesson> lessonRepository, ISiteService siteService)
 	{
 		_courseRepository = courseRepository;
 		_categoryRepository = categoryRepository;
@@ -37,6 +38,7 @@ public class CourseService : ICourseService
 		_categoryLogger = categoryLogger;
 		_syllabusRepository = syllabusRepository;
 		_lessonRepository = lessonRepository;
+		_siteService = siteService;
 	}
 
 	public async Task<CourseDetailDto?> GetCourseDetailAsync(Guid id, CancellationToken cancellationToken = default)
@@ -140,7 +142,7 @@ public class CourseService : ICourseService
 			if (_cache.TryGetValue(cacheKey, out Guid? courseId) && courseId.HasValue)
 				return await GetCourseDetailAsync(courseId.Value, cancellationToken);
 
-            var course = await _courseRepository.GetCourseBySlug(slug);
+			var course = await _courseRepository.GetCourseBySlug(slug);
 			if (course == null) return null;
 
 			_cache.Set(cacheKey, course.Id, TimeSpan.FromHours(1));
@@ -177,23 +179,23 @@ public class CourseService : ICourseService
 			foreach (var course in courses)
 			{
 				items.Add(new CourseCardDto
-                {
-                    Id = course.Id,
-                    Title = course.Title,
-                    Slug = course.Slug,
-                    ShortDescription = course.ShortDescription,
-                    ImageUrl = course.ImageUrl,
-                    Price = course.Price,
-                    DiscountPrice = course.DiscountPrice,
-                    InstructorName = course.Instructor?.FullName ?? "نامشخص",
-                    InstructorAvatar = course.Instructor?.AvatarUrl ?? string.Empty,
-                    CategoryName = course.Category?.Name ?? "دسته‌بندی نشده",
-                    EnrolledCount = course.Enrollments?.Count(e => !e.IsDeleted) ?? 0,
-                    //AverageRating = course.Reviews?.Where(r => r.IsApproved).Average(r => r.Rating) ?? 0,
-                    ReviewCount = course.Reviews?.Count(r => r.IsApproved) ?? 0,
-                    StartDate = course.StartDate,
-                    IsPublished = course.IsPublished
-                });
+				{
+					Id = course.Id,
+					Title = course.Title,
+					Slug = course.Slug,
+					ShortDescription = course.ShortDescription,
+					ImageUrl = course.ImageUrl,
+					Price = course.Price,
+					DiscountPrice = course.DiscountPrice,
+					InstructorName = course.Instructor?.FullName ?? "نامشخص",
+					InstructorAvatar = course.Instructor?.AvatarUrl ?? string.Empty,
+					CategoryName = course.Category?.Name ?? "دسته‌بندی نشده",
+					EnrolledCount = course.Enrollments?.Count(e => !e.IsDeleted) ?? 0,
+					//AverageRating = course.Reviews?.Where(r => r.IsApproved).Average(r => r.Rating) ?? 0,
+					ReviewCount = course.Reviews?.Count(r => r.IsApproved) ?? 0,
+					StartDate = course.StartDate,
+					IsPublished = course.IsPublished
+				});
 			}
 			var result = new PagedResultDto<CourseCardDto>
 			{
@@ -438,35 +440,48 @@ public class CourseService : ICourseService
 	{
 		try
 		{
-			var cacheKey = "homepage_data";
 
-			if (_cache.TryGetValue(cacheKey, out HomePageDto? cached) && cached != null)
-				return cached;
+			var settings = await _siteService.GetSettingsAsync(cancellationToken);
+			var result = new HomePageDto();
 
-			var result = new HomePageDto
-			{
-				FeaturedCourses = (await GetFeaturedCoursesAsync(6, cancellationToken)).ToList(),
-				LatestCourses = (await GetLatestCoursesAsync(6, cancellationToken)).ToList(),
-				PopularCourses = (await GetPopularCoursesAsync(6, cancellationToken)).ToList(),
-				Categories = await GetAllCategoriesWithChildrenAsync(cancellationToken),
-				LatestArticles = await GetLatestArticlesAsync(3, cancellationToken),
-				PopularArticles = await GetPopularArticlesAsync(3, cancellationToken),
-				Stats = new HomeStatsDto
+			if (settings?.ShowFeaturedCourses ?? true)
+				result.FeaturedCourses = (await GetFeaturedCoursesAsync(settings?.HomeFeaturedCoursesCount ?? 6, cancellationToken)).ToList();
+
+			if (settings?.ShowLatestCourses ?? true)
+				result.LatestCourses = (await GetLatestCoursesAsync(settings?.HomeLatestCoursesCount ?? 6, cancellationToken)).ToList();
+
+			if (settings?.ShowPopularCourses ?? true)
+				result.PopularCourses = (await GetPopularCoursesAsync(settings?.HomePopularCoursesCount ?? 6, cancellationToken)).ToList();
+
+			if (settings?.ShowCategories ?? true)
+				result.Categories = await GetAllCategoriesWithChildrenAsync(cancellationToken);
+
+			if (settings?.ShowLatestArticles ?? true)
+				result.LatestArticles = await GetLatestArticlesAsync(settings?.HomeArticlesCount ?? 3, cancellationToken);
+
+			if (settings?.ShowPopularArticles ?? true)
+				result.PopularArticles = await GetPopularArticlesAsync(settings?.HomeArticlesCount ?? 3, cancellationToken);
+
+			if (settings?.ShowStats ?? true)
+				result.Stats = new HomeStatsDto
 				{
 					TotalCourses = await _courseRepository.CountAsync(c => c.IsPublished, cancellationToken),
 					TotalInstructors = 0, // TODO: Implement instructor count
 					TotalStudents = await _enrollmentRepository.CountAsync(null, cancellationToken),
 					TotalArticles = await _articleRepository.CountAsync(a => a.IsPublished, cancellationToken)
-				}
-			};
+				};
+			var cacheKey = "homepage_data";
+			if (_cache.TryGetValue(cacheKey, out HomePageDto? cached) && cached != null)
+				return cached;
+
 
 			_cache.Set(cacheKey, result, new MemoryCacheEntryOptions
 			{
 				AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15),
 				SlidingExpiration = TimeSpan.FromMinutes(5)
 			});
-
 			return result;
+
 		}
 		catch (Exception ex)
 		{
@@ -601,33 +616,33 @@ public class CourseService : ICourseService
 			pageSize = pageSize < 1 ? 10 : (pageSize > 100 ? 100 : pageSize);
 
 			var courses = await _courseRepository.GetPagedCoursesByInstructorAsync(instructorId, page, pageSize, cancellationToken);
-            courses = courses.Where(x => x.InstructorId == instructorId).ToList();
+			courses = courses.Where(x => x.InstructorId == instructorId).ToList();
 
 			var totalCount = await _courseRepository.CountAsync(c => c.InstructorId == instructorId && !c.IsDeleted, cancellationToken);
-            var items = new List<CourseCardDto>();
-            foreach (var course in courses)
-            {
-                items.Add( new CourseCardDto
-                {
-                    Id = course.Id,
-                    Title = course.Title,
-                    Slug = course.Slug,
-                    ShortDescription = course.ShortDescription,
-                    ImageUrl = course.ImageUrl,
-                    Price = course.Price,
-                    DiscountPrice = course.DiscountPrice,
-                    CategoryName = course.Category?.Name ?? "دسته‌بندی نشده",
-                    EnrolledCount = course.Enrollments?.Count(e => !e.IsDeleted) ?? 0,
-                   // AverageRating = course.Reviews?.Where(r => r.IsApproved).Average(r => r.Rating) ?? 0,
-                    ReviewCount = course.Reviews?.Count(r => r.IsApproved) ?? 0,
-                    StartDate = course.StartDate,
-                    IsPublished = course.IsPublished
-                });
-            }
-
-            return new PagedResultDto<CourseCardDto>
+			var items = new List<CourseCardDto>();
+			foreach (var course in courses)
 			{
-				Items =items,
+				items.Add(new CourseCardDto
+				{
+					Id = course.Id,
+					Title = course.Title,
+					Slug = course.Slug,
+					ShortDescription = course.ShortDescription,
+					ImageUrl = course.ImageUrl,
+					Price = course.Price,
+					DiscountPrice = course.DiscountPrice,
+					CategoryName = course.Category?.Name ?? "دسته‌بندی نشده",
+					EnrolledCount = course.Enrollments?.Count(e => !e.IsDeleted) ?? 0,
+					// AverageRating = course.Reviews?.Where(r => r.IsApproved).Average(r => r.Rating) ?? 0,
+					ReviewCount = course.Reviews?.Count(r => r.IsApproved) ?? 0,
+					StartDate = course.StartDate,
+					IsPublished = course.IsPublished
+				});
+			}
+
+			return new PagedResultDto<CourseCardDto>
+			{
+				Items = items,
 				TotalCount = totalCount,
 				PageNumber = page,
 				PageSize = pageSize
@@ -1239,7 +1254,7 @@ public class CourseService : ICourseService
 				};
 			}
 
-			await _lessonRepository.DeleteAsync(lesson,cancellationToken);
+			await _lessonRepository.DeleteAsync(lesson, cancellationToken);
 			await ClearCourseCacheAsync(lesson.Syllabus.CourseId);
 
 			return new AuthResultDto
@@ -1288,12 +1303,12 @@ public class CourseService : ICourseService
 
 			for (int i = 0; i < lessonIds.Count; i++)
 			{
-				var lesson = await _lessonRepository.GetByIdAsync(lessonIds[i],cancellationToken);
+				var lesson = await _lessonRepository.GetByIdAsync(lessonIds[i], cancellationToken);
 				if (lesson != null && !lesson.IsDeleted)
 				{
 					lesson.Order = i + 1;
 					lesson.LastModifiedDate = DateTime.UtcNow;
-					await _lessonRepository.UpdateAsync(lesson,cancellationToken);
+					await _lessonRepository.UpdateAsync(lesson, cancellationToken);
 
 				}
 			}

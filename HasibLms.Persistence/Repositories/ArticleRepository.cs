@@ -1,6 +1,7 @@
 ﻿using HasibLms.Domain.Entities.InvestigativeEntities;
 using HasibLms.Domain.Interfaces;
 using HasibLms.Persistence.Data;
+using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 namespace HasibLms.Persistence.Repositories;
@@ -17,7 +18,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
 			.Include(a => a.Author)
 			.Include(a => a.ArticleTags)
 				.ThenInclude(at => at.Tag)
-			.FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted && a.IsPublished, cancellationToken);
+			.FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted , cancellationToken);
 	}
 
 	public async Task<Article?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
@@ -32,7 +33,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
 	public async Task<IReadOnlyList<Article>> GetLatestPublishedAsync(int count, CancellationToken cancellationToken = default)
 	{
 		return await _dbSet
-			.Where(a => !a.IsDeleted && a.IsPublished)
+			.Where(a => !a.IsDeleted && a.IsPublished && !a.FeatureStatus)
 			.Include(a => a.Author)
 			.OrderByDescending(a => a.PublishedAt)
 			.Take(count)
@@ -42,7 +43,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
 	public async Task<IReadOnlyList<Article>> GetPagedArticlesAsync(int page, int pageSize, CancellationToken cancellationToken = default)
 	{
 		return await _dbSet
-			.Where(a => !a.IsDeleted && a.IsPublished)
+			.Where(a => !a.IsDeleted && a.IsPublished && !a.FeatureStatus)
 			.Include(a => a.Author)
 			.OrderByDescending(a => a.PublishedAt)
 			.Skip((page - 1) * pageSize)
@@ -68,7 +69,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
 		CancellationToken cancellationToken = default)
 	{
 		IQueryable<Article> query = _dbSet
-			.Where(a => !a.IsDeleted && a.IsPublished)
+			.Where(a => !a.IsDeleted )
 			.Include(a => a.Author);
 
 		// فیلتر بر اساس جستجو

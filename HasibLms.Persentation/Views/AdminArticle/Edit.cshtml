@@ -1,4 +1,5 @@
-﻿<!-- Views/AdminArticle/Edit.cshtml -->
+﻿@using HasibLms.Shared.Extensions
+<!-- Views/AdminArticle/Edit.cshtml -->
 @model HasibLms.Shared.DTOs.Admin.ArticleDetailAdminDto
 @{
     ViewBag.Title = "ویرایش مقاله";
@@ -15,7 +16,8 @@
             <a href="/admin/articles" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
                 <i class="fas fa-arrow-right ml-2"></i>بازگشت
             </a>
-            <a href="/articles/@Model.Slug" target="_blank" class="px-4 py-2 border rounded-lg hover:bg-gray-50 text-primary-600">
+            <a href="/article/@Model.Slug" target="_blank"
+               class="px-4 py-2 border rounded-lg hover:bg-gray-50 text-primary-600">
                 <i class="fas fa-external-link-alt ml-2"></i>مشاهده در سایت
             </a>
         </div>
@@ -32,7 +34,6 @@
         <input type="hidden" asp-for="CreatedAt" />
         <input type="hidden" asp-for="PublishedAt" />
         <input type="hidden" asp-for="ViewCount" />
-        <input type="hidden" name="RemoveImage" id="removeImageFlag" value="false" />
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Content -->
@@ -60,9 +61,9 @@
 
                         <div>
                             <label class="block text-sm font-medium mb-1">متن مقاله <span class="text-red-500">*</span></label>
-                            <textarea asp-for="Content" id="contentEditor" rows="15" class="w-full px-4 py-2 border rounded-lg"
-                                      placeholder="متن مقاله را وارد کنید..."></textarea>
-                            <span asp-validation-for="Content" class="text-red-500 text-sm"></span>
+
+                            <textarea asp-for="Content" id="contentEditor" name="Content" class="w-full"></textarea>
+                            <input type="hidden" asp-for="Content" id="contentHidden" value="@Model.Content" />
                         </div>
                     </div>
                 </div>
@@ -73,101 +74,51 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                             <p class="text-xs text-gray-500">تاریخ ایجاد</p>
-                            <p class="font-medium">@Model.CreatedAt.ToString("yyyy/MM/dd - HH:mm")</p>
+                            <p class="font-medium text-sm">@Model.CreatedAt.ToPersianDateFull()</p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-500">تاریخ انتشار</p>
-                            <p class="font-medium">@(Model.PublishedAt?.ToString("yyyy/MM/dd - HH:mm") ?? "-")</p>
+                            <p class="font-medium text-sm">@(Model.PublishedAt.ToPersianDateFull())</p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-500">بازدید</p>
-                            <p class="font-medium">@Model.ViewCount.ToString("N0")</p>
+                            <p class="font-medium text-sm">@Model.ViewCount.ToString("N0")</p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-500">نویسنده</p>
-                            <p class="font-medium">@Model.AuthorName</p>
+                            <p class="font-medium text-sm">@Model.AuthorName</p>
                         </div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t">
-                        <p class="text-xs text-gray-500">آخرین بروزرسانی</p>
-                        <p class="font-medium">@(Model.UpdatedAt?.ToString("yyyy/MM/dd - HH:mm") ?? Model.CreatedAt.ToString("yyyy/MM/dd - HH:mm"))</p>
                     </div>
                 </div>
             </div>
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- Image Upload -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">تصویر مقاله</h2>
-
-                    <div class="space-y-4">
-                        <!-- نمایش تصویر فعلی -->
-                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                        {
-                            <div id="currentImageContainer">
-                                <p class="text-xs text-gray-500 mb-1">تصویر فعلی</p>
-                                <div class="relative">
-                                    <img src="@Model.ImageUrl" alt="@Model.Title" class="w-full rounded-lg max-h-48 object-cover">
-                                    <button type="button" onclick="removeCurrentImage()"
-                                            class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <input type="hidden" asp-for="ImageUrl" />
-                        }
-
-                        <!-- Drop Zone برای آپلود -->
-                        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 transition-colors @(!string.IsNullOrEmpty(Model.ImageUrl) ? "hidden" : "")"
-                             id="dropZone">
-                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-500">برای آپلود کلیک کنید یا تصویر را بکشید</p>
-                            <input type="file" name="ImageFile" accept="image/*" class="hidden" id="imageInput">
-                            <p class="text-xs text-gray-400 mt-2">فرمت‌های مجاز: jpg, png, webp</p>
-                        </div>
-
-                        <!-- پیش‌نمایش تصویر جدید -->
-                        <div id="imagePreview" class="hidden">
-                            <p class="text-xs text-gray-500 mb-1">تصویر جدید</p>
-                            <div class="relative">
-                                <img id="previewImage" src="" alt="پیش‌نمایش" class="w-full rounded-lg max-h-48 object-cover">
-                                <button type="button" onclick="removeNewImage()"
-                                        class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Publish Settings -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
                     <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">تنظیمات انتشار</h2>
 
                     <div class="space-y-4">
-                        <!-- وضعیت انتشار -->
                         <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div>
                                 <label class="text-sm font-medium">وضعیت انتشار</label>
-                                <p class="text-xs text-gray-500">@(Model.IsPublished ? "مقاله منتشر شده است" : "مقاله در حالت پیش‌نویس است")</p>
+                                <p class="text-xs text-gray-500">@(Model.IsPublished ? "منتشر شده" : "پیش‌نویس")</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" asp-for="IsPublished" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                            </label>
+                            <select asp-for="IsPublished" class="px-3 py-1.5 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+                                <option value="true">منتشر</option>
+                                <option value="false">پیش‌نویس</option>
+                            </select>
                         </div>
 
-                        <!-- وضعیت منتخب -->
                         <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div>
-                                <label class="text-sm font-medium">منتخب</label>
-                                <p class="text-xs text-gray-500">@(Model.IsFeatured ? "مقاله در لیست منتخب‌ها است" : "مقاله در لیست منتخب‌ها نیست")</p>
+                                <label class="text-sm font-medium">مقاله منتخب</label>
+                                <p class="text-xs text-gray-500">نمایش در بخش مقالات منتخب</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" asp-for="IsFeatured" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500"></div>
-                            </label>
+                            <select asp-for="IsFeatured" class="px-3 py-1.5 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+                                <option value="true">بله</option>
+                                <option value="false">خیر</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -203,7 +154,8 @@
                             <div class="flex gap-2">
                                 <input type="text" id="tagInput" placeholder="نام تگ جدید..."
                                        class="flex-1 px-3 py-2 border rounded-lg text-sm">
-                                <button type="button" onclick="addTag()" class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">
+                                <button type="button" onclick="addTag()"
+                                        class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700">
                                     <i class="fas fa-plus ml-1"></i>افزودن
                                 </button>
                             </div>
@@ -234,11 +186,8 @@
                         <i class="fas fa-save ml-2"></i>ذخیره تغییرات
                     </button>
 
-                    <button type="button" onclick="previewArticle()" class="w-full px-4 py-3 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors">
-                        <i class="fas fa-eye ml-2"></i>پیش‌نمایش
-                    </button>
-
-                    <button type="button" onclick="deleteArticle()" class="w-full px-4 py-3 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors">
+                    <button type="button" onclick="deleteArticle()"
+                            class="w-full px-4 py-3 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors">
                         <i class="fas fa-trash ml-2"></i>حذف مقاله
                     </button>
                 </div>
@@ -249,83 +198,63 @@
 
 @section Scripts {
     <script>
-        // ============================================
-        // مدیریت تصویر
-        // ============================================
-        const dropZone = document.getElementById('dropZone');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImage = document.getElementById('previewImage');
-        const currentImageContainer = document.getElementById('currentImageContainer');
-
-        // آپلود تصویر جدید
-        if (dropZone) {
-            dropZone.addEventListener('click', () => imageInput.click());
-
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('border-primary-500', 'bg-primary-50');
-            });
-
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('border-primary-500', 'bg-primary-50');
-            });
-
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('border-primary-500', 'bg-primary-50');
-                if (e.dataTransfer.files.length) {
-                    imageInput.files = e.dataTransfer.files;
-                    previewImageFile(e.dataTransfer.files[0]);
-                }
-            });
-        }
-
-        if (imageInput) {
-            imageInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    previewImageFile(this.files[0]);
-                }
-            });
-        }
-
-        function previewImageFile(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-                if (dropZone) dropZone.classList.add('hidden');
-                if (currentImageContainer) currentImageContainer.classList.add('hidden');
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof CKEDITOR === 'undefined') {
+                console.error('CKEDITOR is not defined');
+                Swal.fire({ title: 'خطا', text: 'ویرایشگر بارگذاری نشد', icon: 'error' });
+                return;
             }
-            reader.readAsDataURL(file);
-        }
 
-        function removeNewImage() {
-            imageInput.value = '';
-            imagePreview.classList.add('hidden');
-            if (dropZone) dropZone.classList.remove('hidden');
-            if (currentImageContainer) currentImageContainer?.classList.remove('hidden');
-        }
+            const editor = CKEDITOR.replace('contentEditor', {
+                language: 'fa',
+                height: 500,
+                resize_enabled: true,
+                contentsLangDirection: 'rtl',
+                // ❌ هیچ extraPlugins نگذارید
+                filebrowserUploadUrl: '/admin/articles/upload-image',
+                filebrowserImageUploadUrl: '/admin/articles/upload-image',
+                toolbar: [
+                    { name: 'document', items: ['Source', '-', 'Preview', 'Print'] },
+                    { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+                    { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
+                    '/',
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'] },
+                    { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                    { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'] },
+                    '/',
+                    { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+                    { name: 'colors', items: ['TextColor', 'BGColor'] },
+                    { name: 'tools', items: ['Maximize', 'ShowBlocks'] }
+                ],
+                on: {
+                    instanceReady: function (ev) {
+                        console.log('CKEditor 4 ready');
+                        const hiddenInput = document.getElementById('contentHidden');
+                        if (hiddenInput && hiddenInput.value) {
+                            ev.editor.setData(hiddenInput.value);
+                        }
+                    }
+                }
+            });
 
-        function removeCurrentImage() {
-            if (currentImageContainer) currentImageContainer.classList.add('hidden');
-            document.getElementById('removeImageFlag').value = 'true';
-            document.querySelector('input[name="ImageUrl"]').value = '';
-            if (dropZone) dropZone.classList.remove('hidden');
-        }
+            document.getElementById('articleForm').addEventListener('submit', function () {
+                document.getElementById('contentHidden').value = editor.getData();
+            });
+        });
+
 
         // ============================================
         // مدیریت تگ‌ها
         // ============================================
         let selectedTags = new Set();
 
-        // بارگذاری تگ‌های انتخاب شده از مدل
         @if (Model.Tags != null)
         {
-                foreach (var tag in Model.Tags)
-                {
-                        <text>selectedTags.add('@tag.Replace("'", "\\'")');</text>
-                }
+            foreach (var tag in Model.Tags)
+            {
+                <text>selectedTags.add('@Html.Raw(tag.Replace("'", "\\'"))');</text>
+            }
         }
 
         function updateTagNamesInput() {
@@ -349,11 +278,8 @@
             createTagElement(tagName);
             input.value = '';
             updateTagNamesInput();
-
-            // حذف از پیشنهادات
             removeSuggestion(tagName);
 
-            // حذف پیام "هیچ تگی انتخاب نشده است"
             const emptyMsg = document.querySelector('#tagsContainer .text-gray-400');
             if (emptyMsg) emptyMsg.remove();
         }
@@ -389,20 +315,6 @@
             tagItem.remove();
             updateTagNamesInput();
 
-            // بازگرداندن به پیشنهادات (اگر در لیست AllTags باشد)
-            @if (Model.AllTags != null)
-            {
-                    foreach (var tag in Model.AllTags)
-                    {
-                            <text>
-                            if ('@tag.Name.Replace("'", "\\'")' === tagName) {
-                                addSuggestion('@tag.Name');
-                            }
-                            </text>
-                    }
-            }
-
-            // اگر هیچ تگی باقی نمانده، پیام نمایش داده شود
             if (selectedTags.size === 0) {
                 const container = document.getElementById('tagsContainer');
                 const emptyMsg = document.createElement('span');
@@ -413,82 +325,28 @@
         }
 
         function removeSuggestion(tagName) {
-            const suggestions = document.querySelectorAll('.tag-suggestion');
-            suggestions.forEach(el => {
-                if (el.textContent.trim() === tagName) {
-                    el.remove();
-                }
+            document.querySelectorAll('.tag-suggestion').forEach(el => {
+                if (el.textContent.trim() === tagName) el.remove();
             });
         }
 
-        function addSuggestion(tagName) {
-            const container = document.getElementById('suggestedTagsContainer');
-            if (!container) return;
-
-            // بررسی اینکه قبلاً وجود ندارد
-            const exists = container.querySelectorAll('.tag-suggestion');
-            for (let el of exists) {
-                if (el.textContent.trim() === tagName) return;
-            }
-
-            const suggestionEl = document.createElement('span');
-            suggestionEl.className = 'tag-suggestion px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-xs cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600';
-            suggestionEl.textContent = tagName;
-            suggestionEl.onclick = function() { addExistingTag(tagName); };
-            container.appendChild(suggestionEl);
-        }
-
-        // اضافه کردن با Enter
-        document.getElementById('tagInput').addEventListener('keypress', function(e) {
+        document.getElementById('tagInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 addTag();
             }
         });
 
-        // ============================================
-        // اعتبارسنجی فرم
-        // ============================================
-        document.getElementById('articleForm').addEventListener('submit', function(e) {
-            updateTagNamesInput();
-        });
-
-        // ============================================
         // شمارنده کاراکترهای خلاصه
-        // ============================================
-        document.querySelector('textarea[name="Summary"]')?.addEventListener('input', function() {
+        document.querySelector('textarea[name="Summary"]')?.addEventListener('input', function () {
             const counter = document.getElementById('summaryCounter');
             if (counter) {
                 counter.textContent = `${this.value.length} / 500 کاراکتر`;
-                if (this.value.length > 500) {
-                    counter.classList.add('text-red-500');
-                } else {
-                    counter.classList.remove('text-red-500');
-                }
+                counter.classList.toggle('text-red-500', this.value.length > 500);
             }
         });
 
-        // ============================================
-        // پیش‌نمایش
-        // ============================================
-        function previewArticle() {
-            const content = document.getElementById('contentEditor').value;
-            const title = document.querySelector('input[name="Title"]').value;
-
-            Swal.fire({
-                title: title || 'پیش‌نمایش مقاله',
-                html: `<div class="text-left max-h-96 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div class="prose dark:prose-invert max-w-none">${content}</div>
-                </div>`,
-                width: '800px',
-                confirmButtonText: 'بستن',
-                showCloseButton: true
-            });
-        }
-
-        // ============================================
         // حذف مقاله
-        // ============================================
         async function deleteArticle() {
             const result = await Swal.fire({
                 title: 'حذف مقاله',
@@ -500,68 +358,29 @@
                 confirmButtonColor: '#dc2626'
             });
 
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'در حال حذف...',
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading()
+            if (!result.isConfirmed) return;
+
+            Swal.fire({ title: 'در حال حذف...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            try {
+                const articleId = document.querySelector('input[name="Id"]').value;
+                const response = await fetch(`/admin/articles/delete?id=${articleId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    }
                 });
 
-                try {
-                    const articleId = document.querySelector('input[name="Id"]').value;
-                    const response = await fetch(`/admin/articles/delete?id=${articleId}`, {
-                        method: 'POST',
-                        headers: {
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
-                        }
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'موفق!',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonText: 'باشه'
-                        }).then(() => {
-                            window.location.href = '/admin/articles';
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'خطا!',
-                            text: data.message,
-                            icon: 'error',
-                            confirmButtonText: 'باشه'
-                        });
-                    }
-                } catch (error) {
-                    Swal.fire({
-                        title: 'خطا!',
-                        text: 'خطا در ارتباط با سرور',
-                        icon: 'error',
-                        confirmButtonText: 'باشه'
-                    });
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire({ title: 'موفق!', text: data.message, icon: 'success', confirmButtonText: 'باشه' })
+                        .then(() => window.location.href = '/admin/articles');
+                } else {
+                    Swal.fire({ title: 'خطا!', text: data.message, icon: 'error', confirmButtonText: 'باشه' });
                 }
+            } catch (error) {
+                Swal.fire({ title: 'خطا!', text: 'خطا در ارتباط با سرور', icon: 'error', confirmButtonText: 'باشه' });
             }
         }
-
-        // ============================================
-        // ویرایشگر متن (اختیاری)
-        // ============================================
-        // اگر از CKEditor استفاده می‌کنید:
-        // ClassicEditor.create(document.getElementById('contentEditor'), {
-        //     language: 'fa',
-        //     toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo']
-        // }).catch(error => console.error(error));
-
-        // اگر از TinyMCE استفاده می‌کنید:
-        // tinymce.init({
-        //     selector: '#contentEditor',
-        //     language: 'fa',
-        //     height: 400,
-        //     menubar: false,
-        //     plugins: 'link lists image',
-        //     toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image'
-        // });
     </script>
 }

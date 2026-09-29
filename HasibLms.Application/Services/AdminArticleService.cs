@@ -43,7 +43,7 @@ public class AdminArticleService : IAdminArticleService
             Summary = a.Summary,
             ImageUrl = a.ImageUrl,
             IsPublished = a.IsPublished,
-            IsFeatured = false, // اگر فیلد IsFeatured در Article وجود ندارد
+            IsFeatured = a.FeatureStatus, // اگر فیلد IsFeatured در Article وجود ندارد
             //ViewCount = a.,
             CreatedAt = a.CreatedDate,
             PublishedAt = a.PublishedAt,
@@ -102,8 +102,8 @@ public class AdminArticleService : IAdminArticleService
             var slug = GenerateSlug(model.Title);
             if (await _articleRepository.ExistsAsync(a => a.Slug == slug, cancellationToken))
             {
-                slug = $"{slug}-{Guid.NewGuid().ToString()[..8]}";
-            }
+				slug = $"{slug}-{Guid.NewGuid().ToString()[8..16]}";
+			}
 
             // آپلود تصویر
             string? imageUrl = null;
@@ -220,7 +220,7 @@ public class AdminArticleService : IAdminArticleService
             article.Summary = model.Summary ?? string.Empty;
             article.Content = model.Content;
             article.LastModifiedDate = DateTime.Now;
-
+            article.FeatureStatus = model.IsFeatured;
             // تغییر وضعیت انتشار
             if (model.IsPublished != article.IsPublished)
             {
@@ -368,11 +368,11 @@ public class AdminArticleService : IAdminArticleService
             if (article == null)
                 return new AuthResultDto { Succeeded = false, Message = "مقاله یافت نشد" };
 
-            // اگر فیلد IsFeatured در Article وجود ندارد، می‌توانید آن را اضافه کنید
-            // یا از یک متد دیگر برای مدیریت مقالات منتخب استفاده کنید
-            // در حال حاضر فقط یک پیام موفقیت برمی‌گردانیم
+            article.FeatureStatus = isFeatured;
+			await _articleRepository.UpdateAsync(article, cancellationToken);
 
-            return new AuthResultDto
+
+			return new AuthResultDto
             {
                 Succeeded = true,
                 Message = $"مقاله {(isFeatured ? "به منتخب‌ها اضافه" : "از منتخب‌ها حذف")} شد"
@@ -489,21 +489,38 @@ public class AdminArticleService : IAdminArticleService
         }
     }
 
-    #region Helper Methods
+	#region Helper Methods
 
-    private string GenerateSlug(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return string.Empty;
+	private string GenerateSlug(string text)
+	{
+		if (string.IsNullOrWhiteSpace(text))
+			return $"article-{Guid.NewGuid():N}".Substring(0, 20);
 
-        // تبدیل به حروف کوچک و حذف کاراکترهای غیرمجاز
-        var slug = text.ToLowerInvariant();
-        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\s-]", "");
-        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"\s+", "-");
-        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-+", "-");
-        return slug.Trim('-');
-    }
+		var slug = text.Trim().ToLowerInvariant();
 
-    private async Task<string> SaveImageAsync(IFormFile file,string path, CancellationToken cancellationToken = default)
+		// تبدیل حروف عربی به فارسی
+		slug = slug.Replace("ي", "ی").Replace("ك", "ک").Replace("ة", "ه");
+
+		// حذف کاراکترهای غیرمجاز (نگه‌داشتن حروف فارسی، انگلیسی، اعداد، خط تیره)
+		slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\u0600-\u06FF\s-]", "");
+
+		// فاصله‌ها → خط تیره
+		slug = System.Text.RegularExpressions.Regex.Replace(slug, @"\s+", "-");
+
+		// خط تیره‌های تکراری → یکی
+		slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-{2,}", "-");
+
+		// حذف خط تیره ابتدا و انتها
+		slug = slug.Trim('-');
+
+		// اگر بعد از همه این‌ها خالی شد، از GUID استفاده کن
+		if (string.IsNullOrWhiteSpace(slug))
+			slug = $"article-{Guid.NewGuid():N}".Substring(0, 20);
+
+		return slug;
+	}
+
+	private async Task<string> SaveImageAsync(IFormFile file,string path, CancellationToken cancellationToken = default)
     {
         var uploadsFolder = Path.Combine(path, "uploads", "articles");
 

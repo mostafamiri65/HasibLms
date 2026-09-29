@@ -20,11 +20,11 @@ public class CreateCourseDto
 	public string Description { get; set; } = string.Empty;
 
 	[Display(Name = "قیمت (تومان)")]
-	[Range(0, 100000000, ErrorMessage = "قیمت نامعتبر است")]
+	[Range(0, 1000000000, ErrorMessage = "قیمت نامعتبر است")]
 	public decimal Price { get; set; }
 
 	[Display(Name = "قیمت با تخفیف")]
-	[Range(0, 100000000, ErrorMessage = "قیمت نامعتبر است")]
+	[Range(0, 1000000000, ErrorMessage = "قیمت نامعتبر است")]
 	public decimal? DiscountPrice { get; set; }
 
 	[Display(Name = "تصویر دوره")]
@@ -32,6 +32,9 @@ public class CreateCourseDto
 
 	[Display(Name = "ویدیو معرفی")]
 	public string? IntroVideoUrl { get; set; }
+
+	[Display(Name = "ویدیوی اصلی دوره")]
+	public string? FullVideoUrl { get; set; }
 
 	[Display(Name = "نوع دوره")]
 	public CourseType CourseType { get; set; } = CourseType.Online;
@@ -43,11 +46,11 @@ public class CreateCourseDto
 	public DateTime? EndDate { get; set; }
 
 	[Display(Name = "مدت دوره (ساعت)")]
-	[Range(1, 500, ErrorMessage = "مدت دوره باید بین 1 تا 500 ساعت باشد")]
+	[Range(1, 1000, ErrorMessage = "مدت دوره باید بین 1 تا 1000 ساعت باشد")]
 	public int DurationHours { get; set; }
 
 	[Display(Name = "ظرفیت")]
-	[Range(1, 1000, ErrorMessage = "ظرفیت باید بین 1 تا 1000 باشد")]
+	[Range(1, 10000, ErrorMessage = "ظرفیت باید بین 1 تا 10000 باشد")]
 	public int Capacity { get; set; } = 50;
 
 	[Display(Name = "دسته‌بندی")]
@@ -65,8 +68,8 @@ public class CreateCourseDto
 public class UpdateCourseDto : CreateCourseDto
 {
 	public Guid Id { get; set; }
+	public string Slug { get; set; } = string.Empty;
 }
-
 public class CourseEditDto
 {
 	public Guid Id { get; set; }
@@ -78,13 +81,16 @@ public class CourseEditDto
 	public decimal? DiscountPrice { get; set; }
 	public string? ImageUrl { get; set; }
 	public string? IntroVideoUrl { get; set; }
+	public string? FullVideoUrl { get; set; }   // ✅ جدید
 	public CourseType CourseType { get; set; }
 	public DateTime StartDate { get; set; }
 	public DateTime? EndDate { get; set; }
 	public int DurationHours { get; set; }
 	public int Capacity { get; set; }
 	public Guid CategoryId { get; set; }
+	public Guid InstructorId { get; set; }      // ✅ جدید
 	public bool IsPublished { get; set; }
+	public bool IsFeatured { get; set; }         // ✅ جدید
 	public string? MetaTitle { get; set; }
 	public string? MetaDescription { get; set; }
 }

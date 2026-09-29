@@ -11,6 +11,66 @@ body {
     direction: rtl;
     scroll-behavior: smooth;
 }
+/* ============================================
+   Persian Datepicker Custom Styles
+   ============================================ */
+.datepicker-plot-area {
+    font-family: 'Vazirmatn', sans-serif !important;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+    direction: rtl;
+    z-index: 9999 !important;
+}
+
+    .datepicker-plot-area .datepicker-day-view .table-days td.selected span {
+        background-color: #2563eb !important;
+        color: #fff !important;
+    }
+
+    .datepicker-plot-area .datepicker-day-view .table-days td:hover span {
+        background-color: #dbeafe !important;
+        color: #1e40af !important;
+    }
+
+    .datepicker-plot-area .datepicker-header .btn.switch {
+        background-color: #f3f4f6;
+        border-radius: 0.375rem;
+    }
+
+.persian-date-input {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left 0.75rem center;
+    background-size: 1.25rem;
+    padding-left: 2.5rem;
+}
+
+.dark .persian-date-input {
+    background-color: #374151 !important;
+    color: #e5e7eb;
+    border-color: #4b5563;
+}
+
+.dark .datepicker-plot-area {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #e5e7eb;
+}
+
+    .dark .datepicker-plot-area .datepicker-day-view .table-days td span {
+        color: #e5e7eb;
+    }
+
+    .dark .datepicker-plot-area .datepicker-day-view .table-days td:hover span {
+        background-color: #2563eb !important;
+    }
+
+    .dark .datepicker-plot-area .datepicker-header .btn.switch {
+        background-color: #374151;
+        color: #e5e7eb;
+    }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -40,6 +100,51 @@ body {
     background: #4b5563;
 }
 
+/* ============================================
+   CKEditor 4 Content Images Styling
+   ============================================ */
+.prose img,
+.article-content img,
+#contentEditor + div img,
+.cke_editable img {
+    max-width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: contain;
+    border-radius: 0.75rem;
+    margin: 1.5rem auto;
+    display: block;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* برای ویرایشگر */
+.cke_editable {
+    font-family: 'Vazirmatn', sans-serif;
+    direction: rtl;
+    text-align: right;
+    min-height: 400px;
+    padding: 1rem 1.5rem;
+    background: white;
+}
+
+.cke_chrome {
+    border-radius: 0.75rem !important;
+    overflow: hidden;
+    border-color: #e5e7eb !important;
+}
+
+.cke_top {
+    background: #f9fafb !important;
+    border-color: #e5e7eb !important;
+}
+
+@media (max-width: 768px) {
+    .prose img,
+    .article-content img {
+        max-height: 400px;
+        border-radius: 0.5rem;
+    }
+}
 /* Loading Spinner */
 .spinner {
     width: 40px;
